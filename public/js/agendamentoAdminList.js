@@ -1,11 +1,13 @@
 document.addEventListener("DOMContentLoaded", async () => {
     // 1. Verificar autenticação
-    if (!window.checkAuthentication()) {
+    // Use a função padronizada do auth.js
+    const token = window.auth.getToken(); // <<-- CORREÇÃO
+
+    // Verificar autenticação usando a função padronizada
+    if (!window.auth.checkAuth()) { // <<-- CORREÇÃO
         return;
     }
-
     const tbody = document.querySelector("#bookingsTableBody");
-    const token = window.getAuthToken(); // Obtém o token de auth.js
 
     if (!tbody) {
         console.error("Elemento tbody com ID 'bookingsTableBody' não encontrado.");

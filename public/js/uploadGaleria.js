@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Verificar autenticação primeiro
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = 'login.html';
+    // Use a função padronizada do auth.js
+    const token = window.auth.getToken(); // <<-- CORREÇÃO
+
+    // Verificar autenticação usando a função padronizada
+    if (!window.auth.checkAuth()) { // <<-- CORREÇÃO
         return;
     }
 

@@ -2,13 +2,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const agendamentosList = document.getElementById('agendamentosList');
     const novoAgendamentoBtn = document.getElementById('novoAgendamentoBtn');
     const API_BASE_URL = "https://psychological-cecilla-peres-7395ec38.koyeb.app/api";
-    const token = localStorage.getItem("jwtToken");
+    // Use a função padronizada do auth.js
+    const token = window.auth.getToken(); // <<-- CORREÇÃO
 
-    if (!token) {
-        window.location.href = "login.html";
+    // Verificar autenticação usando a função padronizada
+    if (!window.auth.checkAuth()) { // <<-- CORREÇÃO
         return;
     }
-
     novoAgendamentoBtn.addEventListener('click', redirectToNewAgendamento);
     loadAgendamentos();
 

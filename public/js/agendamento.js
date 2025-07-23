@@ -2,11 +2,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("bookingForm");
   const responseDiv = document.getElementById("response");
   const API_BASE_URL = "https://psychological-cecilla-peres-7395ec38.koyeb.app/api";
-  const token = localStorage.getItem("jwtToken");
 
-  // Verificar autenticação
-  if (!token) {
-    window.location.href = "login.html";
+  // Use a função padronizada do auth.js
+  const token = window.auth.getToken(); // <<-- CORREÇÃO
+
+  // Verificar autenticação usando a função padronizada
+  if (!window.auth.checkAuth()) { // <<-- CORREÇÃO
     return;
   }
 

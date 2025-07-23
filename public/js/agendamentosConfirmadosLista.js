@@ -1,14 +1,9 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    // Verificar autenticação
-    if (typeof window.checkAuthentication !== 'function' || !window.checkAuthentication()) {
-        window.location.href = 'login.html';
-        return;
-    }
+    // Use a função padronizada do auth.js
+    const token = window.auth.getToken(); // <<-- CORREÇÃO
 
-    const token = window.getAuthToken();
-    if (!token) {
-        alert("Erro de autenticação. Faça login novamente.");
-        window.location.href = 'login.html';
+    // Verificar autenticação usando a função padronizada
+    if (!window.auth.checkAuth()) { // <<-- CORREÇÃO
         return;
     }
 

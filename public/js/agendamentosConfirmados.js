@@ -1,17 +1,12 @@
 document.addEventListener("DOMContentLoaded", async () => {
     // Verificar autenticação
-    if (typeof window.checkAuthentication !== 'function' || !window.checkAuthentication()) {
-        window.location.href = 'login.html';
+    // Use a função padronizada do auth.js
+    const token = window.auth.getToken(); // <<-- CORREÇÃO
+
+    // Verificar autenticação usando a função padronizada
+    if (!window.auth.checkAuth()) { // <<-- CORREÇÃO
         return;
     }
-
-    const token = window.getAuthToken();
-    if (!token) {
-        alert("Erro de autenticação. Faça login novamente.");
-        window.location.href = 'login.html';
-        return;
-    }
-
     // Obter ID do agendamento da URL
     const urlParams = new URLSearchParams(window.location.search);
     const agendamentoId = urlParams.get('id');

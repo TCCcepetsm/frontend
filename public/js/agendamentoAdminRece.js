@@ -1,18 +1,12 @@
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        // 1. Verificação robusta de autenticação
-        if (typeof window.checkAuthentication !== 'function' ||
-            typeof window.getAuthToken !== 'function') {
-            throw new Error("Funções de autenticação não disponíveis");
-        }
 
-        if (!window.checkAuthentication()) {
+        // Use a função padronizada do auth.js
+        const token = window.auth.getToken(); // <<-- CORREÇÃO
+
+        // Verificar autenticação usando a função padronizada
+        if (!window.auth.checkAuth()) { // <<-- CORREÇÃO
             return;
-        }
-
-        const token = window.getAuthToken();
-        if (!token) {
-            throw new Error("Token de autenticação não disponível");
         }
 
         // 2. Seleção de elementos

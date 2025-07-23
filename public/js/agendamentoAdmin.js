@@ -1,26 +1,14 @@
 // Aguarda o carregamento completo do DOM
 document.addEventListener("DOMContentLoaded", async () => {
-    // Basic authentication check:
-    // This assumes you have a public/js/auth.js file that handles token storage
-    // and provides window.checkAuthentication() and window.getAuthToken() functions.
-    if (typeof window.checkAuthentication === 'function' && !window.checkAuthentication()) {
-        // If not authenticated, checkAuthentication should handle redirection
+    if (!window.auth.checkAuth()) { // <<-- CORREÇÃO
         return;
     }
 
     const tbody = document.querySelector("#bookingsTable tbody");
-    const token = (typeof window.getAuthToken === 'function') ? window.getAuthToken() : null;
+    const token = window.auth.getToken(); // <<-- CORREÇÃO
 
     if (!tbody) {
         console.error("Elemento tbody com ID '#bookingsTable tbody' não encontrado.");
-        return;
-    }
-
-    if (!token) {
-        tbody.innerHTML = '<tr><td colspan="3">Erro de autenticação. Por favor, faça login novamente.</td></tr>';
-        console.error("Token de autenticação não encontrado. Redirecionando para login.");
-        // Optional: Redirect to login if token is missing
-        // window.location.href = 'login.html';
         return;
     }
 

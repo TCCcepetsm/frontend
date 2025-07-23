@@ -1,5 +1,6 @@
 (function () {
-    const TOKEN_KEY = 'myApp_jwtToken';
+    // PADRONIZE A CHAVE DO TOKEN AQUI
+    const TOKEN_KEY = 'authToken'; // <<-- CORREÇÃO IMPORTANTE
 
     function getAuthToken() {
         try {
@@ -21,6 +22,8 @@
     function removeAuthToken() {
         try {
             localStorage.removeItem(TOKEN_KEY);
+            // Limpe também as informações do usuário para consistência
+            localStorage.removeItem('userInfo');
         } catch (e) {
             console.error("Error removing token", e);
         }
@@ -30,24 +33,24 @@
         const token = getAuthToken();
         if (!token) {
             console.warn("Não autenticado: Token JWT ausente. Redirecionando para login.");
-            window.location.href = '/login.html'; // Caminho absoluto
+            // Use um caminho absoluto para evitar erros de navegação
+            window.location.href = '/views/login.html';
             return false;
         }
 
-        // Validação básica do token (exemplo)
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             if (payload.exp && Date.now() >= payload.exp * 1000) {
-                console.warn("Token expirado");
+                console.warn("Token expirado. Redirecionando para login.");
                 removeAuthToken();
-                window.location.href = '/login.html';
+                window.location.href = '/views/login.html';
                 return false;
             }
             return true;
         } catch (e) {
-            console.error("Invalid token", e);
+            console.error("Token inválido:", e);
             removeAuthToken();
-            window.location.href = '/login.html';
+            window.location.href = '/views/login.html';
             return false;
         }
     }
@@ -55,10 +58,10 @@
     function logout() {
         removeAuthToken();
         console.log("Logout realizado. Redirecionando para login.");
-        window.location.href = '/login.html';
+        window.location.href = '/views/login.html';
     }
 
-    // Expose these functions
+    // Exponha as funções globalmente
     window.auth = {
         getToken: getAuthToken,
         setToken: setAuthToken,
@@ -66,4 +69,9 @@
         checkAuth: checkAuthentication,
         logout: logout
     };
+
+    // Para compatibilidade com scripts antigos que podem chamar diretamente
+    window.getAuthToken = getAuthToken;
+    window.checkAuthentication = checkAuthentication;
+    window.logout = logout;
 })();
