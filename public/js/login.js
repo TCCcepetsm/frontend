@@ -46,42 +46,62 @@ document.addEventListener('DOMContentLoaded', function () {
                     email: email,
                     senha: password
                 }),
-                credentials: 'include', // Isso requer CORS configurado no backend
-                mode: 'cors' // Garante o modo CORS
+                credentials: 'include',
+                mode: 'cors'
             });
+
+            console.log('Status da resposta:', response.status);
+            const responseData = await response.json();
+            console.log('Dados completos da resposta:', responseData);
 
             // Verificar resposta
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || 'Credenciais inválidas');
+                throw new Error(responseData.message || `Erro ${response.status}: Credenciais inválidas`);
             }
 
-            // Processar resposta
-            const { jwtToken, userData } = await response.json();
+            // Processar resposta com verificações robustas
+            const jwtToken = responseData.jwtToken || responseData.token;
+            const userData = responseData.userData || responseData.user || {};
+
+            if (!jwtToken) {
+                throw new Error('Token JWT não recebido na resposta');
+            }
+
+            // Definir roles padrão se não existirem
+            if (!userData.roles) {
+                console.warn('Roles não definidos no userData, usando padrão');
+                userData.roles = ['ROLE_PACIENTE'];
+            }
 
             // Armazenar tokens
             localStorage.setItem('jwtToken', jwtToken);
             localStorage.setItem('userData', JSON.stringify(userData));
 
-            // Redirecionar
-            const redirectUrl = userData.roles?.includes('ROLE_PROFISSIONAL')
-                ? '../views/inicialAdmin.html'
-                : '../views/inicial.html';
+            // Determinar URL de redirecionamento com fallback
+            let redirectUrl = '../views/inicial.html';
+            if (Array.isArray(userData.roles)) {
+                redirectUrl = userData.roles.includes('ROLE_PROFISSIONAL')
+                    ? '../views/inicialAdmin.html'
+                    : '../views/inicial.html';
+            }
 
+            console.log('Redirecionando para:', redirectUrl);
             window.location.href = redirectUrl;
 
         } catch (error) {
-            console.error('Erro no login:', error);
-            alert(error.message || 'Erro ao realizar login. Tente novamente.');
+            console.error('Erro detalhado no login:', error);
+            alert(error.message || 'Erro ao realizar login. Por favor, verifique suas credenciais e tente novamente.');
         } finally {
             // Restaurar botão
             submitBtn.disabled = false;
             submitBtn.textContent = 'Entrar';
         }
     });
-    console.log('Elementos encontrados:', {
-        form: document.getElementById('loginForm'),
-        email: document.getElementById('email'),
-        senha: document.getElementById('senha')
+
+    // Log de verificação dos elementos (opcional para debug)
+    console.log('Elementos do formulário verificados:', {
+        form: loginForm,
+        email: emailInput,
+        senha: passwordInput
     });
 });
