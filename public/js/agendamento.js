@@ -35,7 +35,8 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/agendamentos`, {
+      // CORREÇÃO: Chamar o endpoint correto (/api/agendamentos2/criar2)
+      const response = await fetch(`${API_BASE_URL}/agendamentos2/criar2`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -50,18 +51,18 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erro ao agendar");
+        // Tenta ler a resposta como texto para dar uma mensagem de erro melhor
+        const errorText = await response.text();
+        console.error("Erro do servidor:", errorText); // Log para depuração
+        throw new Error(errorText || "Erro ao agendar");
       }
 
       const data = await response.json();
       showSuccessMessage(formData, data);
-
-      // Limpar formulário após sucesso
       form.reset();
 
     } catch (error) {
-      console.error("Erro:", error);
+      console.error("Erro no fetch:", error);
       showErrorMessage(error);
     }
   });

@@ -27,26 +27,24 @@ async function loadGaleria(tipo = '') {
     try {
         showLoadingState();
 
-        // CORREÇÃO: Obter o token
+        // CORREÇÃO: Obter o token e adicioná-lo ao cabeçalho da requisição
         const token = window.auth.getToken();
         if (!token) {
-            // Se não houver token, o usuário não está logado.
-            // A função checkAuth em auth.js já deveria ter redirecionado, mas esta é uma segurança extra.
-            showErrorState("Você precisa estar logado para ver a galeria.");
+            showErrorState("Acesso negado. Faça o login para ver a galeria.");
             return;
         }
 
         const url = tipo ? `${API_BASE_URL}/galeria/tipo/${tipo}` : `${API_BASE_URL}/galeria`;
 
-        // CORREÇÃO: Adicionar o cabeçalho de autorização
         const response = await fetch(url, {
             headers: {
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${token}` // <<-- CABEÇALHO ESSENCIAL
+                'Authorization': `Bearer ${token}` // <<-- ADICIONADO HEADER DE AUTENTICAÇÃO
             }
         });
 
         if (!response.ok) {
+            // O erro 403 cairá aqui
             throw new Error(`Erro HTTP: ${response.status}`);
         }
 
