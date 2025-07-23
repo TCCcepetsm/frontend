@@ -46,7 +46,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     email: email,
                     senha: password
                 }),
-                credentials: 'include'
+                credentials: 'include', // Isso requer CORS configurado no backend
+                mode: 'cors' // Garante o modo CORS
             });
 
             // Verificar resposta
