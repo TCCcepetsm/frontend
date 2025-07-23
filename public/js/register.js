@@ -43,64 +43,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-async function handleRegister(event) {
-    event.preventDefault();
-
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner"></span> Cadastrando...';
-
+async function handleRegister() {
     try {
-        const formData = getFormData();
-
-        const response = await fetch('https://seuservidor.com/api/usuario/registrar', {
+        const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify({
+                nome: 'teste',
+                email: 'teste@teste.com',
+                telefone: '11999999999',
+                senha: '123456',
+                confirmacaoSenha: '123456',
+                aceitouTermos: true,
+                tipo: 'PF'
+            })
         });
 
-        // Verifica se a resposta está OK e tem conteúdo
-        if (!response.ok || !response.body) {
-            const errorText = await response.text();
-            throw new Error(errorText || 'Erro desconhecido');
+        if (response.status === 201) {
+            const data = await response.json();
+            console.log('Registro bem-sucedido:', data);
+            // Redirecionar para login ou dashboard
+        } else {
+            throw new Error(`Erro ${response.status}`);
         }
-
-        // Tenta parsear o JSON
-        const data = await response.json();
-
-        if (data.error) {
-            throw new Error(data.error);
-        }
-
-        // Sucesso
-        showSuccess(data.message || 'Cadastro realizado com sucesso!');
-        setTimeout(() => window.location.href = '/login.html', 2000);
-
     } catch (error) {
-        // Tratamento de erros melhorado
-        let errorMessage = error.message;
-
-        try {
-            // Tenta parsear se for um JSON stringificado
-            const errorObj = JSON.parse(error.message);
-            if (errorObj.error) {
-                errorMessage = errorObj.error;
-            } else if (Array.isArray(errorObj)) {
-                errorMessage = errorObj.join(', ');
-            }
-        } catch (e) {
-            // Não é JSON, mantém a mensagem original
-        }
-
-        showError(errorMessage);
         console.error('Erro no registro:', error);
-
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Cadastrar';
+        // Mostrar mensagem de erro para o usuário
     }
 }
 function getFormData() {
