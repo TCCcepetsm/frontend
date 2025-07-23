@@ -91,8 +91,9 @@ async function handleRegister() {
         toggleLoading(true);
 
         const formData = getFormData();
-        const errors = validateForm(formData);
+        console.log("Dados do formulário:", formData); // Log para depuração
 
+        const errors = validateForm(formData);
         if (errors.length > 0) {
             showError(errors.join('<br>'));
             return;
@@ -106,22 +107,21 @@ async function handleRegister() {
             body: JSON.stringify(formData)
         });
 
-        const result = await response.json();
-
-        // CORREÇÃO: Verifica o status da resposta corretamente
-        if (response.ok) {
-            showSuccess('Registro realizado com sucesso!');
-            // Redireciona após 2 segundos
-            setTimeout(() => {
-                window.location.href = '/views/login.html';
-            }, 2000);
-        } else {
-            // Só lança erro se a resposta não for bem-sucedida
-            throw new Error(result.message || 'Erro no registro');
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Detalhes do erro da API:", errorData);
+            throw new Error(errorData.message || errorData.error || 'Erro no registro');
         }
 
+        const result = await response.json();
+        showSuccess('Registro realizado com sucesso!');
+
+        setTimeout(() => {
+            window.location.href = '/views/login.html';
+        }, 2000);
+
     } catch (error) {
-        console.error('Erro no registro:', error);
+        console.error('Erro completo:', error);
         showError(error.message || 'Erro ao realizar o registro');
     } finally {
         if (submitBtn) submitBtn.disabled = false;
