@@ -36,67 +36,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Formulário de registro
+    // Formulário de registro - versão robusta
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Isso previne o recarregamento da página
-            handleRegister();
+        // Criar elementos de feedback se não existirem
+        createFeedbackElements();
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleRegister();
         });
     }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Verificar se já está logado
-    if (localStorage.getItem('authToken')) {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const redirectUrl = userInfo?.roles?.includes('ROLE_ADMIN')
-            ? '/views/inicialAdmin.html'
-            : '/views/inicial.html';
-        window.location.href = redirectUrl;
-        return;
+// Função para criar elementos de feedback
+function createFeedbackElements() {
+    // Criar spinner se não existir
+    if (!document.getElementById('loading-spinner')) {
+        const spinner = document.createElement('div');
+        spinner.id = 'loading-spinner';
+        spinner.style.cssText = 'display:none; margin-left:10px;';
+        spinner.innerHTML = '⏳'; // Ou use um GIF/CSS animation
+        const submitBtn = document.querySelector('#registerForm [type="submit"]');
+        if (submitBtn) {
+            submitBtn.insertAdjacentElement('afterend', spinner);
+        }
     }
 
-    // Configurar máscaras
-    $('#cpf').mask('000.000.000-00');
-    $('#cnpj').mask('00.000.000/0000-00');
-    $('#phone').mask('(00) 00000-0000');
-
-    // Toggle PF/PJ
-    document.querySelectorAll('.toggle-option').forEach(button => {
-        button.addEventListener('click', function () {
-            const logo = document.querySelector('.logo img');
-            const isPJ = this.dataset.value === 'pj';
-
-            document.querySelectorAll('.toggle-option').forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            document.getElementById('userType').value = this.dataset.value;
-
-            // Alternar entre CPF e CNPJ
-            document.getElementById('cpfGroup').style.display = isPJ ? 'none' : 'block';
-            document.getElementById('cnpjGroup').style.display = isPJ ? 'block' : 'none';
-            document.getElementById('cpf').required = !isPJ;
-            document.getElementById('cnpj').required = isPJ;
-
-            // Mudar tema e logo
-            document.body.classList.toggle('theme-orange', isPJ);
-            logo.src = isPJ ? '../public/images/logoAdmin.png' : '../public/images/logo.png';
-        });
-    });
-
-    // Formulário de registro
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Previne o recarregamento da página aqui
-            handleRegister(); // Chama a função sem passar o evento
-        });
+    // Criar container de mensagens se não existir
+    if (!document.getElementById('feedback-messages')) {
+        const messagesDiv = document.createElement('div');
+        messagesDiv.id = 'feedback-messages';
+        messagesDiv.style.cssText = 'margin: 15px 0; min-height: 50px;';
+        registerForm.parentNode.insertBefore(messagesDiv, registerForm.nextSibling);
     }
-});
+}
 
 async function handleRegister() {
+    const submitBtn = document.querySelector('#registerForm [type="submit"]');
+
     try {
-        // Mostrar spinner de carregamento
+        // Desabilitar botão durante o processamento
+        if (submitBtn) submitBtn.disabled = true;
         toggleLoading(true);
 
         const formData = getFormData();
@@ -104,21 +85,15 @@ async function handleRegister() {
 
         if (errors.length > 0) {
             showError(errors.join('<br>'));
-            toggleLoading(false);
             return;
         }
 
-        // Usando a função makeApiRequest que já está implementada
         const response = await makeApiRequest(formData);
 
         if (response.ok) {
             const data = await response.json();
             showSuccess('Registro realizado com sucesso!');
-
-            // Redirecionar após 2 segundos
-            setTimeout(() => {
-                window.location.href = '/views/login.html';
-            }, 2000);
+            setTimeout(() => window.location.href = '/views/login.html', 2000);
         } else {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Erro no registro');
@@ -127,7 +102,32 @@ async function handleRegister() {
         console.error('Erro no registro:', error);
         showError(error.message || 'Erro ao realizar o registro');
     } finally {
+        // Reabilitar botão após conclusão
+        if (submitBtn) submitBtn.disabled = false;
         toggleLoading(false);
+    }
+}
+
+function toggleLoading(show) {
+    const spinner = document.getElementById('loading-spinner');
+    if (spinner) {
+        spinner.style.display = show ? 'inline-block' : 'none';
+    }
+}
+
+// Funções showError e showSuccess atualizadas
+function showError(message) {
+    const feedbackDiv = document.getElementById('feedback-messages');
+    if (feedbackDiv) {
+        feedbackDiv.innerHTML = `<div class="error-message" style="color:red;">${message}</div>`;
+        feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function showSuccess(message) {
+    const feedbackDiv = document.getElementById('feedback-messages');
+    if (feedbackDiv) {
+        feedbackDiv.innerHTML = `<div class="success-message" style="color:green;">${message}</div>`;
     }
 }
 
