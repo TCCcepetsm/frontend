@@ -70,20 +70,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error('Token de autenticação não recebido');
             }
 
-            // Configuração padrão de roles
-            authData.user.roles = Array.isArray(authData.user.roles)
-                ? authData.user.roles
-                : ['ROLE_PACIENTE'];
+            // Verificação robusta do tipo de usuário
+            const user = authData.user;
+
+            // Configuração padrão de roles se não existir
+            user.roles = Array.isArray(user.roles) ? user.roles : [];
+
+            // Verifica se é profissional por:
+            // 1. Roles (ROLE_PROFISSIONAL)
+            // 2. Tipo de conta (CNPJ ou PROFISSIONAL)
+            // 3. Existência de CNPJ no cadastro
+            const isProfessional = (
+                user.roles.includes('ROLE_PROFISSIONAL') ||
+                ['CNPJ', 'PROFISSIONAL'].includes(user.tipo) ||
+                (user.cnpj && user.cnpj.trim() !== '')
+            );
+
+            // Debug: Mostra os dados do usuário no console
+            console.log('Dados do usuário:', user);
+            console.log('É profissional?', isProfessional);
 
             // Armazenamento seguro
             localStorage.setItem('authToken', authData.token);
-            localStorage.setItem('userProfile', JSON.stringify(authData.user));
+            localStorage.setItem('userProfile', JSON.stringify(user));
 
-            // Redirecionamento baseado em role
-            const isProfessional = authData.user.roles.includes('ROLE_PROFISSIONAL');
-            window.location.href = isProfessional
+            // Redirecionamento correto
+            const redirectUrl = isProfessional
                 ? '../views/inicialAdmin.html'
                 : '../views/inicial.html';
+
+            console.log('Redirecionando para:', redirectUrl);
+            window.location.href = redirectUrl;
 
         } catch (error) {
             console.error('Falha na autenticação:', {

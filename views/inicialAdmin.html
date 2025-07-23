@@ -1,71 +1,65 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+document.addEventListener('DOMContentLoaded', function() {
+// 1. Verificação segura de autenticação e perfil
+const token = localStorage.getItem('authToken') || localStorage.getItem('jwtToken');
+let userData = {};
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Início | Empresa</title>
-    <link rel="stylesheet" href="..\public\css\inicialAdmin.css">
-</head>
+try {
+const userDataString = localStorage.getItem('userProfile') ||
+localStorage.getItem('userData') ||
+'{}';
+userData = JSON.parse(userDataString);
+} catch (e) {
+console.error('Erro ao processar dados do usuário:', e);
+// Limpa dados inválidos e redireciona
+localStorage.removeItem('userProfile');
+localStorage.removeItem('userData');
+window.location.href = '../views/login.html';
+return;
+}
 
-<body>
-       <header>
-        <div class="header-content">
-            <div class="logo">
-                <a href="inicialAdmin.html">
-                    <img src="..\public\images\logoAdmin.png" alt="Logo da Empresa">
-                </a>
-            </div>
-            <nav class="main-nav">
-                <button id="logoutButton" class="nav-button">Sair</button>
-            </nav>
-        </div>
-    </header>
+// Redirecionamento se não autenticado
+if (!token) {
+window.location.href = '../views/login.html';
+return;
+}
 
-    <div class="container">
-        <h1 class="welcome-title">Bem-vindo ao Gravação</h1>
+// 2. Verificação robusta se NÃO é profissional
+const isProfessional = (
+(Array.isArray(userData.roles) && userData.roles.includes('ROLE_PROFISSIONAL')) ||
+['CNPJ', 'PROFISSIONAL'].includes(userData.tipo) ||
+(userData.cnpj && userData.cnpj.trim() !== '')
+);
 
-        <div class="vertical-cards">
-            <!-- Caixa de pedidos de Agendamentos -->
-            <div class="service-card" id="agendamentos-card">
-                <div class="card-image">
-                    <img src="..\public\images\agenda.png" alt="Agendamentos" class="service-img">
-                </div>
-                <div class="card-content">
-                    <h3>Pedidos Agendamentos</h3>
-                    <p>Solicitações de agendamentos</p>
-                    <button class="service-button" onclick="window.location.href='agendamentoAdmin.html'">Acessar</button>
-                </div>
-            </div>
+if (!isProfessional) {
+window.location.href = '../views/inicial.html';
+return;
+}
 
-            <!-- Caixa de agendamentos -->
-            <div class="service-card" id="galeria-card">
-                <div class="card-image">
-                    <img src="..\public\images\calendario.png" alt="Galeria" class="service-img">
-                </div>
-                <div class="card-content">
-                    <h3>Agendamentos Confirmados</h3>
-                    <p>Seus agendamentos aceitos</p>
-                    <button class="service-button" onclick="window.location.href='agendamentoAdminRece.html'">Acessar</button>
-                </div>
-            </div>
+// 3. Efeitos interativos para admin
+const adminCards = document.querySelectorAll('.admin-card');
+adminCards.forEach(card => {
+card.addEventListener('click', () => {
+card.style.transform = 'scale(0.98)';
+setTimeout(() => card.style.transform = 'scale(1)', 200);
+});
+});
 
-            <!-- NOVA CAIXA PARA UPLOAD DE GALERIA -->
-            <div class="service-card" id="upload-card">
-                <div class="card-image">
-                    <img src="..\public\images\image.jfif" alt="Upload de Galeria" class="service-img">
-                </div>
-                <div class="card-content">
-                    <h3>Upload de Galeria</h3>
-                    <p>Envie fotos e vídeos dos eventos</p>
-                    <button class="service-button" onclick="navigateTo('uploadGaleria.html')">Acessar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+// 4. Configuração segura do botão de logout
+const logoutButton = document.getElementById('logoutButton');
+if (logoutButton) {
+logoutButton.addEventListener('click', function() {
+// Limpeza completa de todos os possíveis tokens
+['authToken', 'jwtToken', 'userProfile', 'userData', 'userInfo'].forEach(item => {
+localStorage.removeItem(item);
+});
+window.location.href = '../views/login.html';
+});
+}
 
-    <script src="..\public\js\auth.js"></script>
-    <script src="..\public\js\inicialAdmin.js"></script>
-</body>
+// 5. Função global de navegação
+window.navigateTo = function(page) {
+window.location.href = page;
+};
 
-</html>
+console.log('Página admin carregada com sucesso para:', userData);
+});
