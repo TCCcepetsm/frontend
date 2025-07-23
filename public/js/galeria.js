@@ -274,12 +274,12 @@ function injectStyles() {
                 transition: all 0.3s ease;
             }
             
-            .filter-btn:hover,
-            .filter-btn.active {
-                background-color: #e77d00;
-                color: white;
-                border-color: #e77d00;
-            }
+                   .filter-btn:hover,
+        .filter-btn.active {
+            background-color: #3498db; /* <<-- COR AZUL */
+            color: white;
+            border-color: #2980b9; /* <<-- COR AZUL MAIS ESCURA */
+        }
             
             .modal {
                 display: none;
