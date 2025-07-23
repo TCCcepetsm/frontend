@@ -40,12 +40,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Configura o formulário de registro
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
-        registerForm.addEventListener('submit', async function (e) {  // Adicionado async aqui
-            e.preventDefault();
-            await handleRegister();  // Agora o await é válido
+        registerForm.addEventListener('submit', function (e) {
+            e.preventDefault(); // Impede o recarregamento
+
+            // Chamada assíncrona sem await (usando promises)
+            handleRegister()
+                .then(() => {
+                    // Sucesso (já tratado dentro do handleRegister)
+                })
+                .catch(error => {
+                    console.error("Erro no registro:", error);
+                    // Erro já tratado dentro do handleRegister
+                });
         });
     }
-})
+});
 
 // Cria os elementos de feedback na página
 function createFeedbackElements() {
@@ -79,12 +88,11 @@ function createFeedbackElements() {
 
 // Função principal que lida com o registro
 async function handleRegister() {
-    const submitBtn = document.getElementById('registerBtn');
+    const submitBtn = document.querySelector('#registerForm [type="submit"]');
 
     try {
-        // Desabilita o botão durante o processamento
+        // Desabilita o botão
         if (submitBtn) submitBtn.disabled = true;
-        toggleLoading(true);
 
         const formData = getFormData();
         const errors = validateForm(formData);
@@ -94,62 +102,27 @@ async function handleRegister() {
             return;
         }
 
-        // Debug: Mostra os dados sendo enviados
-        console.log('Dados enviados:', formData);
-
         const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                nome: formData.nome,
-                email: formData.email,
-                telefone: formData.telefone,
-                senha: formData.senha,
-                confirmarSenha: formData.confirmarSenha,
-                agreeTerms: formData.agreeTerms,
-                tipo: formData.tipo,
-                cpf: formData.tipo === 'PF' ? formData.cpf : undefined,
-                cnpj: formData.tipo === 'PJ' ? formData.cnpj : undefined
-            })
+            body: JSON.stringify(formData)
         });
 
-        // Debug: Mostra a resposta bruta
-        const responseText = await response.text();
-        console.log('Resposta da API:', {
-            status: response.status,
-            headers: [...response.headers.entries()],
-            body: responseText || '(vazio)'
-        });
-
-        // Verifica se a resposta está vazia
-        if (!responseText.trim()) {
-            throw new Error('O servidor retornou uma resposta vazia');
-        }
-
-        // Tenta parsear o JSON
-        let responseData;
-        try {
-            responseData = JSON.parse(responseText);
-        } catch (e) {
-            throw new Error(`Resposta inválida do servidor: ${e.message}`);
-        }
+        const result = await response.json();
 
         if (!response.ok) {
-            throw new Error(responseData.message || `Erro ${response.status}`);
+            throw new Error(result.message || 'Erro no registro');
         }
 
-        showSuccess('Registro realizado com sucesso!');
-        setTimeout(() => window.location.href = '/views/login.html', 2000);
+        showSuccess('Registrado com sucesso!');
+        // Não redireciona automaticamente, permite visualizar a mensagem
 
     } catch (error) {
-        console.error('Erro completo:', error);
-        showError(error.message || 'Erro ao conectar com o servidor');
+        showError(error.message || 'Erro ao registrar');
     } finally {
-        // Reabilita o botão
         if (submitBtn) submitBtn.disabled = false;
-        toggleLoading(false);
     }
 }
 // Controla a exibição do spinner
