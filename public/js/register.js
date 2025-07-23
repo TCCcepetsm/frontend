@@ -40,16 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Configura o formulário de registro
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
-        // Cria elementos de feedback (spinner e mensagens)
-        createFeedbackElements();
-
-        // Adiciona o evento de submit
-        registerForm.addEventListener('submit', async (e) => {
+        registerForm.addEventListener('submit', async function (e) {  // Adicionado async aqui
             e.preventDefault();
-            await handleRegister();
+            await handleRegister();  // Agora o await é válido
         });
     }
-});
+})
 
 // Cria os elementos de feedback na página
 function createFeedbackElements() {
