@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos de Agendamento - Admin</title>
+    <link rel="stylesheet" href="../css/styles.css"> <link rel="stylesheet" href="../css/agendamentosAdminList.css"> <link rel="icon" href="../images/gravacao_logo.png" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="../images/gravacao_logo.png" alt="Logo">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="inicialAdmin.html">Início Admin</a></li>
+                <li><a href="#" id="logoutBtn">Sair</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="table-container">
+            <h2>Pedidos de Agendamento</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>DATA</th>
+                        <th>HORÁRIO</th>
+                        <th>ACESSAR</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingsTableBody">
+                    <tr><td colspan="3">Carregando agendamentos...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Sua Empresa. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/agendamentosAdminList.js"></script>
+</body>
+</html>

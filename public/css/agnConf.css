@@ -1,0 +1,162 @@
+/* agnConf.css */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f3f3f3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.top-bar {
+    width: 100%;
+    background-color: #E77D00;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 30px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    width: 15rem;
+    height: 5rem;
+    margin-right: 20px;
+}
+.titulo h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+}
+
+.titulo p {
+    margin: 5px 0 0;
+    font-size: 14px;
+    color: white;
+    opacity: 0.9;
+}
+
+.card {
+    background-color: #ffffff;
+    width: 90%;
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+    text-align: center;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 25px;
+    font-size: 22px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+#detalhes-agendamento {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.info-item {
+    margin-bottom: 15px;
+}
+
+.info-item label {
+    font-weight: 600;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.info-value {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    min-height: 20px;
+}
+
+/* Classes de status (pode ser usado no JavaScript) */
+.status-pendente {
+    color: #f39c12;
+    font-weight: bold;
+}
+
+.status-confirmado {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.status-recusado {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    #detalhes-agendamento {
+        grid-template-columns: 1fr;
+    }
+    
+    .card {
+        width: 85%;
+        padding: 20px 15px;
+    }
+    
+    .top-bar {
+        padding: 12px 20px;
+    }
+    
+    .titulo h1 {
+        font-size: 22px;
+    }
+    
+    .titulo p {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .card {
+        width: 90%;
+        margin: 20px auto;
+    }
+}
+/* O restante do CSS permanece igual */
+#detalhes-agendamento {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Para garantir que o endereço ocupe duas colunas */
+.info-item:nth-last-child(2) {
+    grid-column: span 2;
+}
+
+/* Ajuste para mobile */
+@media (max-width: 768px) {
+    #detalhes-agendamento {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-item:nth-last-child(2) {
+        grid-column: span 1;
+    }
+}

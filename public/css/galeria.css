@@ -1,0 +1,75 @@
+/* CSS */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+header {
+    background-color: #61A5C2;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo img {
+    height: 5rem;
+    width: 15rem;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    /* Empilha as caixas verticalmente */
+    align-items: center;
+    /* Centraliza horizontalmente */
+    gap: 20px;
+    padding: 20px;
+}
+
+h1 {
+    text-decoration-line: underline;
+    font-weight: bold;
+    text-align: center;
+}
+.box {
+    width: 80%;
+    /* Largura ajustável */
+    max-width: 400px;
+    /* Largura máxima */
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    border: 2px solid #2c3e50;
+    text-align: center;
+}
+
+.box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.box img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+}
+
+.box h3 {
+    padding: 15px;
+    margin: 0;
+    color: #2c3e50;
+}

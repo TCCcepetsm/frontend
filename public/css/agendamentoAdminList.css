@@ -1,0 +1,98 @@
+/* Estilos específicos para a tabela de agendamentos pendentes */
+.table-container {
+    width: 80%; /* Ajuste conforme a largura da sua imagem */
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.table-container h2 { /* Estilo para o título "Pedidos de Agendamento" */
+    text-align: center;
+    margin-bottom: 25px;
+    color: #E77D00; /* Cor laranja do seu header */
+    font-size: 1.8rem;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+thead { /* Para o cabeçalho laranja da tabela */
+    background-color: #E77D00;
+    color: #fff;
+}
+th, td {
+    border: 1px solid #e0e0e0; /* Borda leve para as células */
+    padding: 12px 15px; /* Preenchimento um pouco maior */
+    text-align: left;
+}
+th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+tbody tr:nth-child(even) { /* Linhas alternadas */
+    background-color: #fafafa;
+}
+tbody tr:hover {
+    background-color: #fff8f0; /* Fundo mais claro ao passar o mouse */
+}
+
+.btn-access { /* Botão Acessar */
+    background-color: #ff9800; /* Laranja da sua imagem */
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.btn-access:hover {
+    background-color: #e68900;
+}
+
+/* Responsividade da tabela (copiado do seu styles.css original) */
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+    thead {
+        display: none;
+    }
+    tr {
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: #fff;
+    }
+    td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        border: none;
+        border-bottom: 1px solid #eee;
+    }
+    td:last-child {
+        border-bottom: 0;
+    }
+    td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        text-align: left;
+        font-weight: bold;
+        color: #E77D00;
+    }
+    .btn { /* Certifique-se que este .btn não conflita com o global */
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+    }
+}

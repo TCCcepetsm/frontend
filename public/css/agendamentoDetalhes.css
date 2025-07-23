@@ -1,0 +1,175 @@
+/* agendamentoDetalhes.css */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f3f3f3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.top-bar {
+    width: 100%;
+    background-color: #E77D00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 30px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    width: 15rem;
+    height: 5rem;
+    margin-right: 20px;
+}
+
+.card {
+    background-color: #ffffff;
+    width: 90%;
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+    text-align: center;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 25px;
+    font-size: 22px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+#detalhes-agendamento {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.info-item {
+    margin-bottom: 15px;
+}
+
+.info-item label {
+    font-weight: 600;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.info-value {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    min-height: 20px;
+}
+
+/* Classes de status */
+.status-pendente {
+    color: #f39c12;
+    font-weight: bold;
+}
+
+.status-confirmado {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.status-recusado {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* Estilos dos botões */
+.button-group {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background-color: #388E3C  ;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2E7D32 ;
+}
+
+.btn-danger {
+    background-color: #D32F2F   ;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #B71C1C ;
+}
+
+.btn-secondary {
+    background-color: #5a5858  ;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #555555 ;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    #detalhes-agendamento {
+        grid-template-columns: 1fr;
+    }
+    
+    .button-group {
+        grid-column: span 1;
+    }
+    
+    .card {
+        width: 85%;
+        padding: 20px 15px;
+    }
+    
+    .top-bar {
+        padding: 12px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .card {
+        width: 90%;
+        margin: 20px auto;
+    }
+    
+    .btn {
+        padding: 10px;
+        font-size: 13px;
+    }
+}

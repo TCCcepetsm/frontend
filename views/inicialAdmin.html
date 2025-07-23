@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início | Empresa</title>
+    <link rel="stylesheet" href="..\public\css\inicialAdmin.css">
+</head>
+
+<body>
+       <header>
+        <div class="header-content">
+            <div class="logo">
+                <a href="inicialAdmin.html">
+                    <img src="..\public\images\logoAdmin.png" alt="Logo da Empresa">
+                </a>
+            </div>
+            <nav class="main-nav">
+                <button id="logoutButton" class="nav-button">Sair</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="welcome-title">Bem-vindo ao Gravação</h1>
+
+        <div class="vertical-cards">
+            <!-- Caixa de pedidos de Agendamentos -->
+            <div class="service-card" id="agendamentos-card">
+                <div class="card-image">
+                    <img src="..\public\images\agenda.png" alt="Agendamentos" class="service-img">
+                </div>
+                <div class="card-content">
+                    <h3>Pedidos Agendamentos</h3>
+                    <p>Solicitações de agendamentos</p>
+                    <button class="service-button" onclick="window.location.href='agendamentoAdmin.html'">Acessar</button>
+                </div>
+            </div>
+
+            <!-- Caixa de agendamentos -->
+            <div class="service-card" id="galeria-card">
+                <div class="card-image">
+                    <img src="..\public\images\calendario.png" alt="Galeria" class="service-img">
+                </div>
+                <div class="card-content">
+                    <h3>Agendamentos Confirmados</h3>
+                    <p>Seus agendamentos aceitos</p>
+                    <button class="service-button" onclick="window.location.href='agendamentoAdminRece.html'">Acessar</button>
+                </div>
+            </div>
+
+            <!-- NOVA CAIXA PARA UPLOAD DE GALERIA -->
+            <div class="service-card" id="upload-card">
+                <div class="card-image">
+                    <img src="..\public\images\image.jfif" alt="Upload de Galeria" class="service-img">
+                </div>
+                <div class="card-content">
+                    <h3>Upload de Galeria</h3>
+                    <p>Envie fotos e vídeos dos eventos</p>
+                    <button class="service-button" onclick="navigateTo('uploadGaleria.html')">Acessar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="..\public\js\auth.js"></script>
+    <script src="..\public\js\inicialAdmin.js"></script>
+</body>
+
+</html>

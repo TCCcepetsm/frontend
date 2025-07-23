@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início | Empresa</title>
+    <link rel="stylesheet" href="..\public\css\inicial.css">
+</head>
+
+<body>
+   <header>
+        <div class="header-content">
+            <div class="logo">
+                <a href="inicial.html">
+                    <img src="../public/images/logo.png" alt="Logo da Empresa">
+                </a>
+            </div>
+            <nav class="main-nav">
+                <button id="logoutButton" class="nav-button">Sair</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="welcome-title">Bem-vindo ao Gravação</h1>
+
+        <div class="vertical-cards">
+            <!-- Caixa de Agendamentos -->
+            <div class="service-card" id="agendamentos-card">
+                <div class="card-image">
+                    <img src="../public/images/calendario.png" alt="Agendamentos" class="service-img">
+                </div>
+                <div class="card-content">
+                    <div>
+                        <h3>Agendamentos</h3>
+                        <p>Seus agendamentos</p>
+                    </div>
+                    <button class="service-button" onclick="navigateTo('meusAgendamentos.html')">Acessar</button>
+                </div>
+            </div>
+
+            <!-- Caixa de Galeria -->
+            <div class="service-card" id="galeria-card">
+                <div class="card-image">
+                    <img src="..\public\images\image.jfif" alt="Galeria" class="service-img">
+                </div>
+                <div class="card-content">
+                    <div>
+                    <h3>Galeria</h3>
+                    <p>Suas gravações</p>
+                    </div>
+                    <button class="service-button" onclick="navigateTo('galeria.html')">Acessar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé com informações de suporte -->
+    <footer class="support-footer">
+        <div class="support-info">
+            <h3>Suporte</h3>
+            <p>Entre em contato conosco:</p>
+            <p>Email: <a href="mailto:gravacao@gmail.com">gravacao@empresa.com</a></p>
+            <p>Telefone: <a href="tel:+5511999999999">(11) 99999-9999</a></p>
+        </div>
+    </footer>
+
+    <script src="..\public\js\inicial.js"></script>
+</body>
+
+</html>

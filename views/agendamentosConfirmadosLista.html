@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamentos Confirmados - Gravação</title>
+    <link rel="stylesheet" href="../css/agendamentoConfirmados.css"> <link rel="stylesheet" href="../css/style.css"> </head>
+
+<body>
+    <div class="top-bar">
+        <a href="inicialAdmin.html">
+            <img src="../images/logoAdmin.png" alt="Logo da Empresa" class="logo">
+        </a>
+    </div>
+
+    <div class="container card">
+        <h3>Agendamentos Confirmados</h3>
+        <div class="table-responsive">
+            <table class="agendamentos-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Solicitante</th>
+                        <th>Plano</th>
+                        <th>Status</th>
+                        <th>Ações</th> </tr>
+                </thead>
+                <tbody id="agendamentos-confirmados-table-body">
+                    <tr>
+                        <td colspan="6">Carregando agendamentos...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="button-group" style="margin-top: 20px;">
+            <button onclick="window.location.href='inicialAdmin.html'" class="btn-voltar">Voltar para Início</button>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../public/js/agendamentosConfirmadosLista.js"></script> 
+</body>
+
+</html>

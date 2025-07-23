@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Agendamentos</title>
+    <link rel="stylesheet" href="../public/css/meusAgendamentos.css">
+</head>
+
+<body>
+    <div class="page-container">
+        <header class="main-header">
+            <div class="logo-container">
+                <a href="inicial.html">
+                <img src="../public/images/logo.png" alt="Logo da Empresa" class="logo">
+                </a>
+            </div>
+        </header>
+
+        <main class="content-wrapper">
+            <div class="page-header">
+                <h1 class="page-title">Meus Agendamentos</h1>
+                <button id="novoAgendamentoBtn" class="primary-button">+ Novo Agendamento</button>
+            </div>
+
+            <div class="agendamentos-list" id="agendamentosList">
+                <!-- Os agendamentos serão inseridos aqui via JavaScript -->
+                <div class="loading-message">Carregando seus agendamentos...</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../public/js/meusAgendamentos.js"></script>
+</body>
+
+</html>
