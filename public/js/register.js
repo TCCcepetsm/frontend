@@ -83,50 +83,53 @@ function createFeedbackElements() {
 
 // Função principal que lida com o registro
 async function handleRegister() {
-    // Encontra o botão de submit pelo ID
     const submitBtn = document.getElementById('registerBtn');
 
     try {
-        // Desabilita o botão e mostra o spinner
+        // Desabilita o botão e mostra loading
         if (submitBtn) {
             submitBtn.disabled = true;
             toggleLoading(true);
         }
 
-        // Obtém e valida os dados do formulário
         const formData = getFormData();
         const errors = validateForm(formData);
 
-        // Mostra erros se houver
         if (errors.length > 0) {
             showError(errors.join('<br>'));
             return;
         }
 
-        // Faz a requisição para a API
         const response = await makeApiRequest(formData);
 
-        // Processa a resposta
-        if (response.ok) {
-            const data = await response.json();
-            showSuccess('Registro realizado com sucesso!');
-            setTimeout(() => window.location.href = '/views/login.html', 2000);
-        } else {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Erro no registro');
+        // Verifica se a resposta está vazia
+        if (!response.ok || response.status === 204) {
+            throw new Error('Resposta vazia do servidor');
         }
+
+        // Tenta parsear o JSON
+        let data;
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            console.error('Erro ao parsear resposta:', parseError);
+            throw new Error('Formato de resposta inválido');
+        }
+
+        showSuccess('Registro realizado com sucesso!');
+        setTimeout(() => window.location.href = '/views/login.html', 2000);
+
     } catch (error) {
         console.error('Erro no registro:', error);
         showError(error.message || 'Erro ao realizar o registro');
     } finally {
-        // Reabilita o botão e esconde o spinner
+        // Reabilita o botão
         if (submitBtn) {
             submitBtn.disabled = false;
             toggleLoading(false);
         }
     }
 }
-
 // Controla a exibição do spinner
 function toggleLoading(show) {
     const spinner = document.getElementById('loading-spinner');
@@ -216,66 +219,58 @@ function validarCNPJ(cnpj) {
 // Faz a requisição para a API
 async function makeApiRequest(formData) {
     try {
-        // Configura timeout
         const TIMEOUT_DURATION = 30000;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-            controller.abort();
-            console.warn(`Request aborted after ${TIMEOUT_DURATION / 1000} seconds`);
-        }, TIMEOUT_DURATION);
+        const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_DURATION);
 
-        // Prepara os dados para a API
-        const requestData = {
-            nome: formData.nome,
-            email: formData.email,
-            telefone: formData.telefone,
-            senha: formData.senha,
-            confirmarSenha: formData.confirmarSenha,
-            agreeTerms: formData.agreeTerms,
-            tipo: formData.tipo
-        };
-
-        // Adiciona CPF ou CNPJ conforme o tipo
-        if (formData.tipo === 'PJ') {
-            requestData.cnpj = formData.cnpj;
-        } else {
-            requestData.cpf = formData.cpf;
-        }
-
-        // Configura a requisição
         const requestOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify(requestData),
+            body: JSON.stringify({
+                nome: formData.nome,
+                email: formData.email,
+                telefone: formData.telefone,
+                senha: formData.senha,
+                confirmarSenha: formData.confirmarSenha,
+                agreeTerms: formData.agreeTerms,
+                tipo: formData.tipo,
+                ...(formData.tipo === 'PJ' ? { cnpj: formData.cnpj } : { cpf: formData.cpf })
+            }),
             signal: controller.signal
         };
 
-        // Faz a requisição
         const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', requestOptions);
-
         clearTimeout(timeoutId);
 
-        // Verifica a resposta
-        if (!response.ok) {
-            let errorData;
-            try {
-                errorData = await response.json();
-            } catch (e) {
-                errorData = { message: await response.text() };
-            }
-
-            throw new Error(errorData.message || `Erro ${response.status}: ${response.statusText}`);
+        // Verifica se a resposta está vazia
+        const responseText = await response.text();
+        if (!responseText) {
+            throw new Error('Resposta vazia do servidor');
         }
 
-        return response;
+        // Retorna tanto o status quanto o texto para ser parseado posteriormente
+        return {
+            ok: response.ok,
+            status: response.status,
+            json: () => JSON.parse(responseText),
+            text: () => responseText
+        };
 
     } catch (error) {
         if (error.name === 'AbortError') {
-            throw new Error('O servidor está demorando muito para responder. Tente novamente mais tarde.');
+            throw new Error('Tempo de conexão esgotado. Tente novamente.');
         }
         throw error;
     }
+
+
 }
+
+const response = await makeApiRequest(formData);
+console.log('Resposta da API:', {
+    status: response.status,
+    body: await response.text()
+});
