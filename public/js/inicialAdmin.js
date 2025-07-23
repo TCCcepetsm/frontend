@@ -1,49 +1,51 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // Verificação unificada de autenticação
-    const token = localStorage.getItem('authToken');
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+// Em inicialAdmin.js
 
-    // 1. Se não estiver autenticado
-    if (!token) {
+document.addEventListener('DOMContentLoaded', function () {
+    const token = localStorage.getItem('authToken');
+    const userInfoString = localStorage.getItem('userInfo');
+
+    if (!token || !userInfoString) {
+        // Se não houver token ou info, manda para o login
         window.location.href = '/views/login.html';
         return;
     }
 
-    // 2. Verifica se NÃO é profissional
-    const isProfessional = (
-        (Array.isArray(userInfo.roles) && userInfo.roles.includes('ROLE_PROFISSIONAL')) ||
-        userInfo.tipo === 'PJ' ||
-        (userInfo.cnpj && userInfo.cnpj.trim() !== '')
-    );
+    try {
+        const userInfo = JSON.parse(userInfoString);
 
-    // 3. Se não for profissional, redireciona para página normal
-    if (!isProfessional) {
-        window.location.href = '/views/inicial.html';
-        return;
+        // Verifica se o usuário tem a role de profissional
+        const isProfessional = userInfo.roles && userInfo.roles.includes('ROLE_PROFISSIONAL');
+
+        if (!isProfessional) {
+            // Se NÃO for um profissional, ele não deveria estar aqui. Redireciona para a página comum.
+            window.location.href = '/views/inicial.html';
+            return;
+        }
+
+        // Se chegou até aqui, o usuário é profissional e está na página correta.
+        // Continue com a lógica da página.
+        setupLogoutButton();
+
+    } catch (e) {
+        console.error("Erro ao processar informações do usuário:", e);
+        // Limpa dados corrompidos e redireciona para o login
+        localStorage.clear();
+        window.location.href = '/views/login.html';
     }
+});
 
-    // 4. Configuração do botão de logout
+function setupLogoutButton() {
     const logoutButton = document.getElementById('logoutButton');
     if (logoutButton) {
         logoutButton.addEventListener('click', function () {
-            ['authToken', 'userInfo'].forEach(item => {
-                localStorage.removeItem(item);
-            });
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
             window.location.href = '/views/login.html';
         });
     }
+}
 
-    // 5. Efeitos interativos específicos para admin
-    const adminCards = document.querySelectorAll('.admin-card');
-    adminCards.forEach(card => {
-        card.addEventListener('click', () => {
-            card.style.transform = 'scale(0.98)';
-            setTimeout(() => card.style.transform = 'scale(1)', 200);
-        });
-    });
-
-    // 6. Função global de navegação
-    window.navigateTo = function (page) {
-        window.location.href = page;
-    };
-});
+// Função de navegação (se precisar)
+window.navigateTo = function (page) {
+    window.location.href = page;
+};

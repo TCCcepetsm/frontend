@@ -1,3 +1,5 @@
+// Em login.js
+
 document.addEventListener('DOMContentLoaded', function () {
     const loginForm = document.getElementById('loginForm');
     if (!loginForm) return;
@@ -21,52 +23,39 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/auth/authenticate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, senha }),
-                credentials: 'include'
+                body: JSON.stringify({ email, senha })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Erro na autenticação');
+                throw new Error(data.message || 'Credenciais inválidas.');
             }
 
-            // Processamento da resposta
-            const token = data.token || data.jwtToken;
-            const user = data.user || data.userData || {};
+            // --- SUCESSO NO LOGIN ---
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('userInfo', JSON.stringify({
+                email: data.email,
+                nome: data.nome,
+                roles: data.roles // As roles vêm do backend
+            }));
 
-            // Verificação robusta se é CNPJ/Profissional
-            const isCnpjProfessional = checkIfCnpjProfessional(user);
-            console.log('É CNPJ/Profissional?', isCnpjProfessional, user);
+            // Redirecionamento baseado nas roles
+            const isProfessional = data.roles && data.roles.includes('ROLE_PROFISSIONAL');
 
-            // Armazenamento seguro
-            localStorage.setItem('authToken', token);
-            localStorage.setItem('userProfile', JSON.stringify(user));
+            console.log('Usuário autenticado. É profissional?', isProfessional);
+            console.log('Roles recebidas:', data.roles);
 
-            // Redirecionamento correto
-            window.location.href = isCnpjProfessional
+            window.location.href = isProfessional
                 ? '../views/inicialAdmin.html'
                 : '../views/inicial.html';
 
         } catch (error) {
             console.error('Erro no login:', error);
-            alert(error.message || 'Falha no login. Tente novamente.');
+            alert(error.message || 'Falha no login. Verifique seu e-mail e senha.');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Entrar';
         }
     });
 });
-
-function checkIfCnpjProfessional(user) {
-    // Verifica se tem ROLE_PROFISSIONAL (seu "admin")
-    if (Array.isArray(user.roles) && user.roles.includes('ROLE_PROFISSIONAL')) {
-        return true;
-    }
-
-    // Verifica outros critérios (CNPJ ou tipo PJ)
-    return (
-        (user.cnpj && user.cnpj.trim() !== '') ||
-        (user.tipo && ['PJ', 'CNPJ', 'PROFISSIONAL'].includes(user.tipo.toUpperCase()))
-    );
-}

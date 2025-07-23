@@ -107,13 +107,12 @@ async function handleRegister() {
         toggleLoading(true);
 
         const formData = getFormData();
-        console.log("Dados do formulário:", formData);
+        console.log("Dados do formulário para registro:", formData);
 
-        // Validação básica no frontend
         const errors = validateForm(formData);
         if (errors.length > 0) {
-            showError(errors.join('<br>'));
-            return;
+            showError(errors.join(''));
+            return; // Não continue se houver erros
         }
 
         const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
@@ -125,27 +124,29 @@ async function handleRegister() {
             body: JSON.stringify(formData)
         });
 
+        const result = await response.json(); // Sempre parseie a resposta
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Erro no registro");
+            // Se a resposta não for OK, use a mensagem de erro do backend
+            const errorMessage = result.error || (typeof result === 'object' ? JSON.stringify(result) : "Erro no registro");
+            throw new Error(errorMessage);
         }
 
-        const result = await response.json();
-
-        // Armazena os dados de forma consistente
-        localStorage.setItem('authToken', result.token || 'dummy-token');
+        // --- SUCESSO NO REGISTRO ---
+        // Agora 'result' é um AuthenticationResponse com token e roles
+        localStorage.setItem('authToken', result.token);
         localStorage.setItem('userInfo', JSON.stringify({
-            email: result.data?.email || formData.email,
-            nome: result.data?.nome || formData.nome,
-            tipo: formData.tipo,
-            cnpj: formData.tipo === 'PJ' ? formData.cnpj : null,
-            roles: result.data?.roles || (formData.tipo === 'PJ' ? ['ROLE_PROFISSIONAL'] : ['ROLE_USUARIO'])
+            email: result.email,
+            nome: result.nome,
+            roles: result.roles, // As roles vêm diretamente da resposta!
+            tipo: formData.tipo // Mantém o tipo para consistência
         }));
 
-        showSuccess('Registro realizado com sucesso!');
+        showSuccess('Registro realizado com sucesso! Redirecionando...');
 
-        // Redireciona diretamente sem passar pelo login
-        const redirectUrl = formData.tipo === 'PJ'
+        // Redireciona com base nas roles recebidas
+        const isProfessional = result.roles.includes('ROLE_PROFISSIONAL');
+        const redirectUrl = isProfessional
             ? '/views/inicialAdmin.html'
             : '/views/inicial.html';
 
@@ -154,8 +155,8 @@ async function handleRegister() {
         }, 1500);
 
     } catch (error) {
-        console.error('Erro completo:', error);
-        showError(error.message || 'Erro ao realizar o registro');
+        console.error('Erro completo no registro:', error);
+        showError(error.message || 'Não foi possível realizar o registro.');
     } finally {
         if (submitBtn) submitBtn.disabled = false;
         toggleLoading(false);

@@ -1,53 +1,51 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // Verificação unificada de autenticação
-    const token = localStorage.getItem('authToken');
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+// Em inicial.js
 
-    // 1. Se não estiver autenticado
-    if (!token) {
+document.addEventListener('DOMContentLoaded', function () {
+    const token = localStorage.getItem('authToken');
+    const userInfoString = localStorage.getItem('userInfo');
+
+    if (!token || !userInfoString) {
+        // Se não houver token ou info, manda para o login
         window.location.href = '/views/login.html';
         return;
     }
 
-    // 2. Verifica se é profissional (admin)
-    const isProfessional = (
-        (Array.isArray(userInfo.roles) && userInfo.roles.includes('ROLE_PROFISSIONAL')) ||
-        userInfo.tipo === 'PJ' ||
-        (userInfo.cnpj && userInfo.cnpj.trim() !== '')
-    );
+    try {
+        const userInfo = JSON.parse(userInfoString);
 
-    // 3. Se for profissional, redireciona para admin
-    if (isProfessional) {
-        window.location.href = '/views/inicialAdmin.html';
-        return;
+        // Verifica se o usuário tem a role de profissional
+        const isProfessional = userInfo.roles && userInfo.roles.includes('ROLE_PROFISSIONAL');
+
+        if (isProfessional) {
+            // Se for um profissional, ele não deveria estar aqui. Redireciona para a página de admin.
+            window.location.href = '/views/inicialAdmin.html';
+            return;
+        }
+
+        // Se chegou até aqui, o usuário é comum e está na página correta.
+        // Continue com a lógica da página (ex: configurar botão de logout).
+        setupLogoutButton();
+
+    } catch (e) {
+        console.error("Erro ao processar informações do usuário:", e);
+        // Limpa dados corrompidos e redireciona para o login
+        localStorage.clear();
+        window.location.href = '/views/login.html';
     }
+});
 
-    // 4. Configuração do botão de logout
+function setupLogoutButton() {
     const logoutButton = document.getElementById('logoutButton');
     if (logoutButton) {
         logoutButton.addEventListener('click', function () {
-            ['authToken', 'userInfo'].forEach(item => {
-                localStorage.removeItem(item);
-            });
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
             window.location.href = '/views/login.html';
         });
     }
+}
 
-    // 5. Efeitos interativos (exemplo para cards)
-    const cards = document.querySelectorAll('.service-card');
-    cards.forEach(card => {
-        card.addEventListener('mouseenter', () => {
-            card.style.transform = 'translateY(-5px)';
-            card.style.boxShadow = '0 10px 20px rgba(0,0,0,0.15)';
-        });
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'translateY(0)';
-            card.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
-        });
-    });
-
-    // 6. Função global de navegação
-    window.navigateTo = function (page) {
-        window.location.href = page;
-    };
-});
+// Função de navegação (se precisar)
+window.navigateTo = function (page) {
+    window.location.href = page;
+};
