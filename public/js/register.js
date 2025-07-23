@@ -45,30 +45,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function handleRegister(event) {
     event.preventDefault();
+
     const submitBtn = event.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span> Cadastrando...';
 
     try {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner"></span> Preparando...';
-
-        // Acorda o backend antes do registro
-        await wakeUpBackend();
-
-        submitBtn.innerHTML = '<span class="spinner"></span> Validando...';
         const formData = getFormData();
-        const errors = validateForm(formData);
 
-        if (errors.length > 0) {
-            throw new Error(errors.join('<br>'));
+        const response = await fetch('https://seuservidor.com/api/usuario/registrar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        // Verifica se a resposta está OK e tem conteúdo
+        if (!response.ok || !response.body) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Erro desconhecido');
         }
 
-        submitBtn.innerHTML = '<span class="spinner"></span> Cadastrando...';
-        const response = await makeApiRequest(formData);
+        // Tenta parsear o JSON
+        const data = await response.json();
 
-        await handleResponse(response, formData.tipo === 'PJ');
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        // Sucesso
+        showSuccess(data.message || 'Cadastro realizado com sucesso!');
+        setTimeout(() => window.location.href = '/login.html', 2000);
 
     } catch (error) {
-        showError(error.message || 'Erro durante o registro');
+        // Tratamento de erros melhorado
+        let errorMessage = error.message;
+
+        try {
+            // Tenta parsear se for um JSON stringificado
+            const errorObj = JSON.parse(error.message);
+            if (errorObj.error) {
+                errorMessage = errorObj.error;
+            } else if (Array.isArray(errorObj)) {
+                errorMessage = errorObj.join(', ');
+            }
+        } catch (e) {
+            // Não é JSON, mantém a mensagem original
+        }
+
+        showError(errorMessage);
+        console.error('Erro no registro:', error);
+
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Cadastrar';
