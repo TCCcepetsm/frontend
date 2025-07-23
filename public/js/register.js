@@ -83,78 +83,51 @@ function createFeedbackElements() {
 }
 
 // Função principal de registro
-function handleRegister() {
-    return new Promise(function (resolve, reject) {
-        const submitBtn = document.getElementById('registerBtn');
+async function handleRegister() {
+    const submitBtn = document.getElementById('registerBtn');
 
-        try {
-            if (submitBtn) submitBtn.disabled = true;
-            toggleLoading(true);
+    try {
+        if (submitBtn) submitBtn.disabled = true;
+        toggleLoading(true);
 
-            const formData = getFormData();
-            const errors = validateForm(formData);
+        const formData = getFormData();
+        const errors = validateForm(formData);
 
-            if (errors.length > 0) {
-                showError(errors.join('<br>'));
-                return resolve();
-            }
-
-            fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    nome: formData.nome,
-                    email: formData.email,
-                    telefone: formData.telefone,
-                    senha: formData.senha,
-                    confirmarSenha: formData.confirmarSenha,
-                    agreeTerms: formData.agreeTerms,
-                    tipo: formData.tipo,
-                    cpf: formData.tipo === 'PF' ? formData.cpf : undefined,
-                    cnpj: formData.tipo === 'PJ' ? formData.cnpj : undefined
-                })
-            })
-                .then(function (response) {
-                    return response.json().then(function (data) {
-                        return {
-                            status: response.status,
-                            data: data
-                        };
-                    });
-                })
-                .then(function (result) {
-                    if (!result.status.ok) {
-                        throw new Error(result.data.message || 'Erro no registro');
-                    }
-
-                    showSuccess('Registro realizado com sucesso!');
-                    setTimeout(function () {
-                        window.location.href = '/views/login.html';
-                    }, 2000);
-                    resolve();
-                })
-                .catch(function (error) {
-                    console.error('Erro no registro:', error);
-                    showError(error.message || 'Erro ao realizar o registro');
-                    reject(error);
-                })
-                .finally(function () {
-                    if (submitBtn) submitBtn.disabled = false;
-                    toggleLoading(false);
-                });
-
-        } catch (error) {
-            console.error('Erro no registro:', error);
-            showError(error.message || 'Erro ao realizar o registro');
-            if (submitBtn) submitBtn.disabled = false;
-            toggleLoading(false);
-            reject(error);
+        if (errors.length > 0) {
+            showError(errors.join('<br>'));
+            return;
         }
-    });
-}
 
+        const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        // CORREÇÃO: Verifica o status da resposta corretamente
+        if (response.ok) {
+            showSuccess('Registro realizado com sucesso!');
+            // Redireciona após 2 segundos
+            setTimeout(() => {
+                window.location.href = '/views/login.html';
+            }, 2000);
+        } else {
+            // Só lança erro se a resposta não for bem-sucedida
+            throw new Error(result.message || 'Erro no registro');
+        }
+
+    } catch (error) {
+        console.error('Erro no registro:', error);
+        showError(error.message || 'Erro ao realizar o registro');
+    } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        toggleLoading(false);
+    }
+}
 // Controla o spinner de carregamento
 function toggleLoading(show) {
     const spinner = document.getElementById('loading-spinner');
