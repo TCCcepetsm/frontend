@@ -101,67 +101,41 @@ async function handleRegister() {
             return;
         }
 
-        // Verificação de email
-        try {
-            const emailCheck = await fetch(`https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/check-email?email=${encodeURIComponent(formData.email)}`);
-            if (emailCheck.ok) {
-                const emailExists = await emailCheck.json();
-                if (emailExists) {
-                    throw new Error("Email já cadastrado");
-                }
-            }
-        } catch (emailError) {
-            console.error("Erro ao verificar email:", emailError);
-        }
-
-        // Configuração da requisição
-        const requestOptions = {
+        const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify(formData),
-            credentials: 'include' // Para enviar cookies se necessário
-        };
-
-        const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', requestOptions);
-
-        // Verifica se a resposta está vazia
-        const responseText = await response.text();
-        let result = {};
-
-        try {
-            result = responseText ? JSON.parse(responseText) : {};
-        } catch (e) {
-            console.error("Erro ao parsear resposta:", e);
-        }
+            body: JSON.stringify(formData)
+        });
 
         if (!response.ok) {
-            const errorMsg = result.error || result.message || "Erro no registro";
-            console.error("Detalhes do erro:", {
-                status: response.status,
-                statusText: response.statusText,
-                response: result
-            });
-            throw new Error(errorMsg);
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Erro no registro");
         }
 
-        // Armazena os dados do usuário
+        const result = await response.json();
+
+        // Armazena os dados de forma consistente
         localStorage.setItem('authToken', result.token || 'dummy-token');
         localStorage.setItem('userInfo', JSON.stringify({
             email: result.data?.email || formData.email,
             nome: result.data?.nome || formData.nome,
+            tipo: formData.tipo,
+            cnpj: formData.tipo === 'PJ' ? formData.cnpj : null,
             roles: result.data?.roles || (formData.tipo === 'PJ' ? ['ROLE_PROFISSIONAL'] : ['ROLE_USUARIO'])
         }));
 
         showSuccess('Registro realizado com sucesso!');
 
-        // Redirecionamento
+        // Redireciona diretamente sem passar pelo login
+        const redirectUrl = formData.tipo === 'PJ'
+            ? '/views/inicialAdmin.html'
+            : '/views/inicial.html';
+
         setTimeout(() => {
-            window.location.href = formData.tipo === 'PJ'
-                ? '/views/inicialAdmin.html'
-                : '/views/inicial.html';
+            window.location.href = redirectUrl;
         }, 1500);
 
     } catch (error) {
@@ -172,7 +146,6 @@ async function handleRegister() {
         toggleLoading(false);
     }
 }
-
 
 
 // Controla o spinner de carregamento

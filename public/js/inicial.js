@@ -1,53 +1,39 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Verificar autenticação - com tratamento seguro de JSON
-    const token = localStorage.getItem('authToken') || localStorage.getItem('jwtToken');
-    let userData = {};
+    // Verificação unificada de autenticação
+    const token = localStorage.getItem('authToken');
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
 
-    try {
-        const userDataString = localStorage.getItem('userProfile') ||
-            localStorage.getItem('userData') ||
-            '{}';
-        userData = JSON.parse(userDataString);
-    } catch (e) {
-        console.error('Erro ao parsear dados do usuário:', e);
-        // Limpa dados inválidos e redireciona
-        localStorage.removeItem('userProfile');
-        localStorage.removeItem('userData');
-        window.location.href = 'login.html';
-        return;
-    }
-
-    // Redirecionamento se não autenticado
+    // 1. Se não estiver autenticado
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = '/views/login.html';
         return;
     }
 
-    // 2. Verificação de profissional com fallback seguro
+    // 2. Verifica se é profissional (admin)
     const isProfessional = (
-        (Array.isArray(userData.roles) && userData.roles.includes('ROLE_PROFISSIONAL')) ||
-        ['CNPJ', 'PROFISSIONAL'].includes(userData.tipo) ||
-        (userData.cnpj && userData.cnpj.trim() !== '')
+        (Array.isArray(userInfo.roles) && userInfo.roles.includes('ROLE_PROFISSIONAL')) ||
+        userInfo.tipo === 'PJ' ||
+        (userInfo.cnpj && userInfo.cnpj.trim() !== '')
     );
 
+    // 3. Se for profissional, redireciona para admin
     if (isProfessional) {
-        window.location.href = '../views/inicialAdmin.html';
+        window.location.href = '/views/inicialAdmin.html';
         return;
     }
 
-    // 3. Configuração segura do botão de logout
+    // 4. Configuração do botão de logout
     const logoutButton = document.getElementById('logoutButton');
     if (logoutButton) {
         logoutButton.addEventListener('click', function () {
-            // Limpeza completa de todos os possíveis tokens
-            ['authToken', 'jwtToken', 'userProfile', 'userData', 'userInfo'].forEach(item => {
+            ['authToken', 'userInfo'].forEach(item => {
                 localStorage.removeItem(item);
             });
-            window.location.href = 'login.html';
+            window.location.href = '/views/login.html';
         });
     }
 
-    // 4. Efeitos interativos apenas para usuários comuns
+    // 5. Efeitos interativos (exemplo para cards)
     const cards = document.querySelectorAll('.service-card');
     cards.forEach(card => {
         card.addEventListener('mouseenter', () => {
@@ -60,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 5. Função global de navegação
+    // 6. Função global de navegação
     window.navigateTo = function (page) {
         window.location.href = page;
     };

@@ -1,41 +1,39 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Verificação segura de autenticação e perfil
-    const token = localStorage.getItem('authToken') || localStorage.getItem('jwtToken');
-    let userData = {};
+    // Verificação unificada de autenticação
+    const token = localStorage.getItem('authToken');
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
 
-    try {
-        const userDataString = localStorage.getItem('userProfile') ||
-            localStorage.getItem('userData') ||
-            '{}';
-        userData = JSON.parse(userDataString);
-    } catch (e) {
-        console.error('Erro ao processar dados do usuário:', e);
-        // Limpa dados inválidos e redireciona
-        localStorage.removeItem('userProfile');
-        localStorage.removeItem('userData');
-        window.location.href = '../views/login.html';
-        return;
-    }
-
-    // Redirecionamento se não autenticado
+    // 1. Se não estiver autenticado
     if (!token) {
-        window.location.href = '../views/login.html';
+        window.location.href = '/views/login.html';
         return;
     }
 
-    // 2. Verificação robusta se NÃO é profissional
+    // 2. Verifica se NÃO é profissional
     const isProfessional = (
-        (Array.isArray(userData.roles) && userData.roles.includes('ROLE_PROFISSIONAL')) ||
-        ['CNPJ', 'PROFISSIONAL'].includes(userData.tipo) ||
-        (userData.cnpj && userData.cnpj.trim() !== '')
+        (Array.isArray(userInfo.roles) && userInfo.roles.includes('ROLE_PROFISSIONAL')) ||
+        userInfo.tipo === 'PJ' ||
+        (userInfo.cnpj && userInfo.cnpj.trim() !== '')
     );
 
+    // 3. Se não for profissional, redireciona para página normal
     if (!isProfessional) {
-        window.location.href = '../views/inicial.html';
+        window.location.href = '/views/inicial.html';
         return;
     }
 
-    // 3. Efeitos interativos para admin
+    // 4. Configuração do botão de logout
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function () {
+            ['authToken', 'userInfo'].forEach(item => {
+                localStorage.removeItem(item);
+            });
+            window.location.href = '/views/login.html';
+        });
+    }
+
+    // 5. Efeitos interativos específicos para admin
     const adminCards = document.querySelectorAll('.admin-card');
     adminCards.forEach(card => {
         card.addEventListener('click', () => {
@@ -44,22 +42,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 4. Configuração segura do botão de logout
-    const logoutButton = document.getElementById('logoutButton');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', function () {
-            // Limpeza completa de todos os possíveis tokens
-            ['authToken', 'jwtToken', 'userProfile', 'userData', 'userInfo'].forEach(item => {
-                localStorage.removeItem(item);
-            });
-            window.location.href = '../views/login.html';
-        });
-    }
-
-    // 5. Função global de navegação
+    // 6. Função global de navegação
     window.navigateTo = function (page) {
         window.location.href = page;
     };
-
-    console.log('Página admin carregada com sucesso para:', userData);
 });
