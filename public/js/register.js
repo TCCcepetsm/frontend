@@ -39,38 +39,57 @@ document.addEventListener('DOMContentLoaded', () => {
     // Formulário de registro
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
-        registerForm.addEventListener('submit', handleRegister);
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Isso previne o recarregamento da página
+            handleRegister();
+        });
     }
 });
 
-async function handleRegister() {
+async function handleRegister(e) {
+    e.preventDefault();
+
     try {
+        const formData = getFormData();
+        const errors = validateForm(formData);
+
+        if (errors.length > 0) {
+            showError(errors.join('<br>'));
+            return;
+        }
+
         const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                nome: 'teste',
-                email: 'teste@teste.com',
-                telefone: '11999999999',
-                senha: '123456',
-                confirmacaoSenha: '123456',
-                aceitouTermos: true,
-                tipo: 'PF'
+                nome: formData.nome,
+                email: formData.email,
+                telefone: formData.telefone,
+                senha: formData.senha,
+                confirmarSenha: formData.confirmarSenha,
+                agreeTerms: formData.agreeTerms,
+                tipo: formData.tipo,
+                cpf: formData.cpf,
+                cnpj: formData.cnpj
             })
         });
 
-        if (response.status === 201) {
+        if (response.ok) {
             const data = await response.json();
-            console.log('Registro bem-sucedido:', data);
-            // Redirecionar para login ou dashboard
+            showSuccess('Registro realizado com sucesso!');
+            // Redirecionar ou fazer login automático
+            setTimeout(() => {
+                window.location.href = '/views/login.html';
+            }, 2000);
         } else {
-            throw new Error(`Erro ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro no registro');
         }
     } catch (error) {
         console.error('Erro no registro:', error);
-        // Mostrar mensagem de erro para o usuário
+        showError(error.message || 'Erro ao realizar o registro');
     }
 }
 function getFormData() {
