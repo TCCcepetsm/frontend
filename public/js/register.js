@@ -99,6 +99,16 @@ async function handleRegister() {
             return;
         }
 
+        // Adicione esta verificação antes do fetch
+        const emailResponse = await fetch(`/api/usuario/check-email?email=${encodeURIComponent(formData.email)}`);
+        if (!emailResponse.ok) {
+            throw new Error("Erro ao verificar email");
+        }
+        const emailExists = await emailResponse.json();
+        if (emailExists) {
+            throw new Error("Email já cadastrado");
+        }
+
         const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
             method: 'POST',
             headers: {
