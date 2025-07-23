@@ -94,46 +94,74 @@ async function handleRegister() {
         const formData = getFormData();
         console.log("Dados do formulário:", formData);
 
+        // Validação básica no frontend
         const errors = validateForm(formData);
         if (errors.length > 0) {
             showError(errors.join('<br>'));
             return;
         }
-        const response1 = await fetch(`https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/check-email?email=${encodeURIComponent(email)}`);
-        const emailExists = await response1.json();
-        const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
+
+        // Verificação de email
+        try {
+            const emailCheck = await fetch(`https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/check-email?email=${encodeURIComponent(formData.email)}`);
+            if (emailCheck.ok) {
+                const emailExists = await emailCheck.json();
+                if (emailExists) {
+                    throw new Error("Email já cadastrado");
+                }
+            }
+        } catch (emailError) {
+            console.error("Erro ao verificar email:", emailError);
+        }
+
+        // Configuração da requisição
+        const requestOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify(formData)
-        });
+            body: JSON.stringify(formData),
+            credentials: 'include' // Para enviar cookies se necessário
+        };
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Erro do servidor:", errorData);
-            throw new Error(errorData.error || "Erro no registro");
+        const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', requestOptions);
+
+        // Verifica se a resposta está vazia
+        const responseText = await response.text();
+        let result = {};
+
+        try {
+            result = responseText ? JSON.parse(responseText) : {};
+        } catch (e) {
+            console.error("Erro ao parsear resposta:", e);
         }
 
-        const result = await response.json();
+        if (!response.ok) {
+            const errorMsg = result.error || result.message || "Erro no registro";
+            console.error("Detalhes do erro:", {
+                status: response.status,
+                statusText: response.statusText,
+                response: result
+            });
+            throw new Error(errorMsg);
+        }
 
-        // Armazena os dados do usuário e token no localStorage
-        localStorage.setItem('authToken', result.token || 'dummy-token'); // Adapte conforme sua API
+        // Armazena os dados do usuário
+        localStorage.setItem('authToken', result.token || 'dummy-token');
         localStorage.setItem('userInfo', JSON.stringify({
-            email: result.data.email,
-            nome: result.data.nome,
-            roles: result.data.roles || (formData.tipo === 'PJ' ? ['ROLE_PROFISSIONAL'] : ['ROLE_USUARIO'])
+            email: result.data?.email || formData.email,
+            nome: result.data?.nome || formData.nome,
+            roles: result.data?.roles || (formData.tipo === 'PJ' ? ['ROLE_PROFISSIONAL'] : ['ROLE_USUARIO'])
         }));
 
         showSuccess('Registro realizado com sucesso!');
 
-        // Redireciona diretamente baseado no tipo de usuário
-        const redirectUrl = formData.tipo === 'PJ'
-            ? '/views/inicialAdmin.html'
-            : '/views/inicial.html';
-
+        // Redirecionamento
         setTimeout(() => {
-            window.location.href = redirectUrl;
+            window.location.href = formData.tipo === 'PJ'
+                ? '/views/inicialAdmin.html'
+                : '/views/inicial.html';
         }, 1500);
 
     } catch (error) {
