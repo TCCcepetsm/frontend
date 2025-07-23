@@ -46,52 +46,115 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-async function handleRegister(e) {
-    e.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+    // Verificar se já está logado
+    if (localStorage.getItem('authToken')) {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const redirectUrl = userInfo?.roles?.includes('ROLE_ADMIN')
+            ? '/views/inicialAdmin.html'
+            : '/views/inicial.html';
+        window.location.href = redirectUrl;
+        return;
+    }
 
+    // Configurar máscaras
+    $('#cpf').mask('000.000.000-00');
+    $('#cnpj').mask('00.000.000/0000-00');
+    $('#phone').mask('(00) 00000-0000');
+
+    // Toggle PF/PJ
+    document.querySelectorAll('.toggle-option').forEach(button => {
+        button.addEventListener('click', function () {
+            const logo = document.querySelector('.logo img');
+            const isPJ = this.dataset.value === 'pj';
+
+            document.querySelectorAll('.toggle-option').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('userType').value = this.dataset.value;
+
+            // Alternar entre CPF e CNPJ
+            document.getElementById('cpfGroup').style.display = isPJ ? 'none' : 'block';
+            document.getElementById('cnpjGroup').style.display = isPJ ? 'block' : 'none';
+            document.getElementById('cpf').required = !isPJ;
+            document.getElementById('cnpj').required = isPJ;
+
+            // Mudar tema e logo
+            document.body.classList.toggle('theme-orange', isPJ);
+            logo.src = isPJ ? '../public/images/logoAdmin.png' : '../public/images/logo.png';
+        });
+    });
+
+    // Formulário de registro
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Previne o recarregamento da página aqui
+            handleRegister(); // Chama a função sem passar o evento
+        });
+    }
+});
+
+async function handleRegister() {
     try {
+        // Mostrar spinner de carregamento
+        toggleLoading(true);
+
         const formData = getFormData();
         const errors = validateForm(formData);
 
         if (errors.length > 0) {
             showError(errors.join('<br>'));
+            toggleLoading(false);
             return;
         }
 
-        const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                nome: formData.nome,
-                email: formData.email,
-                telefone: formData.telefone,
-                senha: formData.senha,
-                confirmarSenha: formData.confirmarSenha,
-                agreeTerms: formData.agreeTerms,
-                tipo: formData.tipo,
-                cpf: formData.cpf,
-                cnpj: formData.cnpj
-            })
-        });
+        // Usando a função makeApiRequest que já está implementada
+        const response = await makeApiRequest(formData);
 
         if (response.ok) {
             const data = await response.json();
             showSuccess('Registro realizado com sucesso!');
-            // Redirecionar ou fazer login automático
+
+            // Redirecionar após 2 segundos
             setTimeout(() => {
                 window.location.href = '/views/login.html';
             }, 2000);
         } else {
             const errorData = await response.json();
-            throw new Error(errorData.error || 'Erro no registro');
+            throw new Error(errorData.message || 'Erro no registro');
         }
     } catch (error) {
         console.error('Erro no registro:', error);
         showError(error.message || 'Erro ao realizar o registro');
+    } finally {
+        toggleLoading(false);
     }
 }
+
+// Função para mostrar/ocultar spinner de carregamento
+function toggleLoading(show) {
+    const spinner = document.getElementById('loading-spinner') || createSpinner();
+    const submitBtn = document.getElementById('submit-btn');
+
+    if (show) {
+        submitBtn.disabled = true;
+        spinner.style.display = 'inline-block';
+    } else {
+        submitBtn.disabled = false;
+        spinner.style.display = 'none';
+    }
+}
+
+// Função para criar o spinner se não existir
+function createSpinner() {
+    const spinner = document.createElement('div');
+    spinner.id = 'loading-spinner';
+    spinner.style.display = 'none';
+    spinner.innerHTML = '⏳'; // Ou use um GIF animado
+    document.getElementById('registerForm').appendChild(spinner);
+    return spinner;
+}
+
 function getFormData() {
     const userType = document.getElementById("userType").value;
     const isPJ = userType === "pj";
