@@ -359,12 +359,14 @@ header {
     background: #61A5C2;
     color: white;
 }
+
 .logo img {
     transition: all 0.3s ease;
     height: 6rem;
     width: 15rem;
     object-fit: contain;
 }
+
 /* Adicione isso ao seu arquivo CSS */
 .theme-orange {
     --primary-color: #E77D00;
@@ -391,4 +393,26 @@ header {
 
 .login-link a {
     color: var(--primary-color, #61A5C2);
+}
+
+#loading-spinner {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 16px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.register-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
