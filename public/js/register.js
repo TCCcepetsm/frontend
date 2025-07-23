@@ -1,15 +1,30 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Verifica se o usuário já está logado - ATUALIZADA
-    if (localStorage.getItem('authToken')) {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const isProfessional = userInfo?.roles?.includes('ROLE_PROFISSIONAL');
-        const redirectUrl = isProfessional
-            ? '/views/inicialAdmin.html'
-            : '/views/inicial.html';
-        window.location.href = redirectUrl;
-        return;
-    }
+    console.log('Página de registro carregada');
+    console.log('Token no localStorage:', localStorage.getItem('authToken'));
 
+    // Verificação modificada - só redireciona se já estiver logado
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            console.log('UserInfo:', userInfo);
+
+            const isProfessional = userInfo?.roles?.includes('ROLE_PROFISSIONAL') ||
+                userInfo?.tipo === 'PJ' ||
+                (userInfo?.cnpj && userInfo.cnpj.trim() !== '');
+
+            if (isProfessional) {
+                window.location.href = '/views/inicialAdmin.html';
+            } else {
+                window.location.href = '/views/inicial.html';
+            }
+            return;
+        } catch (e) {
+            console.error('Erro ao parsear userInfo:', e);
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+        }
+    }
     // Configura máscaras para os campos - MOVIDO PARA FORA DO BLOCO CONDICIONAL
     $('#cpf').mask('000.000.000-00');
     $('#cnpj').mask('00.000.000/0000-00');
