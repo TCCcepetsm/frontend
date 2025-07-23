@@ -20,18 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const logo = document.querySelector('.logo img');
             const isPJ = this.dataset.value === 'pj';
 
-            // Ativa/desativa botões
             document.querySelectorAll('.toggle-option').forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
             document.getElementById('userType').value = this.dataset.value;
 
-            // Mostra/esconde campos conforme o tipo
             document.getElementById('cpfGroup').style.display = isPJ ? 'none' : 'block';
             document.getElementById('cnpjGroup').style.display = isPJ ? 'block' : 'none';
             document.getElementById('cpf').required = !isPJ;
             document.getElementById('cnpj').required = isPJ;
 
-            // Muda o tema visual
             document.body.classList.toggle('theme-orange', isPJ);
             logo.src = isPJ ? '../public/images/logoAdmin.png' : '../public/images/logo.png';
         });
@@ -40,45 +37,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Configura o formulário de registro
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
-        registerForm.addEventListener('submit', function (e) {
-            e.preventDefault(); // Impede o recarregamento
+        createFeedbackElements();
 
-            // Chamada assíncrona sem await (usando promises)
-            handleRegister()
-                .then(() => {
-                    // Sucesso (já tratado dentro do handleRegister)
-                })
-                .catch(error => {
-                    console.error("Erro no registro:", error);
-                    // Erro já tratado dentro do handleRegister
-                });
+        registerForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            await handleRegister();
         });
     }
 });
 
-// Cria os elementos de feedback na página
+// Funções auxiliares
 function createFeedbackElements() {
-    // Cria o spinner de carregamento se não existir
     if (!document.getElementById('loading-spinner')) {
         const spinner = document.createElement('div');
         spinner.id = 'loading-spinner';
         spinner.style.cssText = 'display:none; margin-left:10px;';
-        spinner.innerHTML = '⏳'; // Pode ser substituído por um GIF
+        spinner.innerHTML = '⏳';
 
-        // Adiciona o spinner após o botão de submit
         const submitBtn = document.getElementById('registerBtn');
-        if (submitBtn) {
-            submitBtn.insertAdjacentElement('afterend', spinner);
-        }
+        if (submitBtn) submitBtn.insertAdjacentElement('afterend', spinner);
     }
 
-    // Cria o container de mensagens se não existir
     if (!document.getElementById('feedback-messages')) {
         const messagesDiv = document.createElement('div');
         messagesDiv.id = 'feedback-messages';
         messagesDiv.style.cssText = 'margin: 15px 0; min-height: 50px;';
 
-        // Adiciona após o formulário
         const registerForm = document.getElementById('registerForm');
         if (registerForm) {
             registerForm.parentNode.insertBefore(messagesDiv, registerForm.nextSibling);
@@ -86,13 +70,12 @@ function createFeedbackElements() {
     }
 }
 
-// Função principal que lida com o registro
 async function handleRegister() {
-    const submitBtn = document.querySelector('#registerForm [type="submit"]');
+    const submitBtn = document.getElementById('registerBtn');
 
     try {
-        // Desabilita o botão
         if (submitBtn) submitBtn.disabled = true;
+        toggleLoading(true);
 
         const formData = getFormData();
         const errors = validateForm(formData);
@@ -107,7 +90,17 @@ async function handleRegister() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify({
+                nome: formData.nome,
+                email: formData.email,
+                telefone: formData.telefone,
+                senha: formData.senha,
+                confirmarSenha: formData.confirmarSenha,
+                agreeTerms: formData.agreeTerms,
+                tipo: formData.tipo,
+                cpf: formData.tipo === 'PF' ? formData.cpf : undefined,
+                cnpj: formData.tipo === 'PJ' ? formData.cnpj : undefined
+            })
         });
 
         const result = await response.json();
@@ -116,40 +109,17 @@ async function handleRegister() {
             throw new Error(result.message || 'Erro no registro');
         }
 
-        showSuccess('Registrado com sucesso!');
-        // Não redireciona automaticamente, permite visualizar a mensagem
+        showSuccess('Registro realizado com sucesso!');
+        setTimeout(() => window.location.href = '/views/login.html', 2000);
 
     } catch (error) {
-        showError(error.message || 'Erro ao registrar');
+        console.error('Erro no registro:', error);
+        showError(error.message || 'Erro ao realizar o registro');
     } finally {
         if (submitBtn) submitBtn.disabled = false;
+        toggleLoading(false);
     }
 }
-// Controla a exibição do spinner
-function toggleLoading(show) {
-    const spinner = document.getElementById('loading-spinner');
-    if (spinner) {
-        spinner.style.display = show ? 'inline-block' : 'none';
-    }
-}
-
-// Mostra mensagens de erro
-function showError(message) {
-    const feedbackDiv = document.getElementById('feedback-messages');
-    if (feedbackDiv) {
-        feedbackDiv.innerHTML = `<div class="error-message" style="color:red;">${message}</div>`;
-        feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-}
-
-// Mostra mensagens de sucesso
-function showSuccess(message) {
-    const feedbackDiv = document.getElementById('feedback-messages');
-    if (feedbackDiv) {
-        feedbackDiv.innerHTML = `<div class="success-message" style="color:green;">${message}</div>`;
-    }
-}
-
 // Obtém os dados do formulário
 function getFormData() {
     const userType = document.getElementById("userType").value;
@@ -264,7 +234,6 @@ async function makeApiRequest(formData) {
 
 }
 
-const response = await makeApiRequest(formData);
 console.log('Resposta da API:', {
     status: response.status,
     body: await response.text()
