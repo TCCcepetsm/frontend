@@ -27,9 +27,23 @@ async function loadGaleria(tipo = '') {
     try {
         showLoadingState();
 
+        // CORREÇÃO: Obter o token
+        const token = window.auth.getToken();
+        if (!token) {
+            // Se não houver token, o usuário não está logado.
+            // A função checkAuth em auth.js já deveria ter redirecionado, mas esta é uma segurança extra.
+            showErrorState("Você precisa estar logado para ver a galeria.");
+            return;
+        }
+
         const url = tipo ? `${API_BASE_URL}/galeria/tipo/${tipo}` : `${API_BASE_URL}/galeria`;
+
+        // CORREÇÃO: Adicionar o cabeçalho de autorização
         const response = await fetch(url, {
-            headers: { 'Accept': 'application/json' }
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}` // <<-- CABEÇALHO ESSENCIAL
+            }
         });
 
         if (!response.ok) {
@@ -44,6 +58,7 @@ async function loadGaleria(tipo = '') {
         showErrorState();
     }
 }
+
 
 function displayGaleria(items) {
     galeriaContainer.innerHTML = '';

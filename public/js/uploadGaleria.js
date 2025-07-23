@@ -168,11 +168,27 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Função para fazer upload dos arquivos
     async function uploadFiles() {
-        const profissionalId = localStorage.getItem('userId');
+        // 1. Obter o token para a autorização da requisição
+        const token = window.auth.getToken();
+        if (!token) {
+            throw new Error('Token de autenticação não encontrado.');
+        }
+
+        // 2. Obter o ID do usuário a partir do 'userInfo' salvo no localStorage
+        const userInfoString = localStorage.getItem('userInfo');
+        if (!userInfoString) {
+            throw new Error('Informações do usuário não encontradas. Faça login novamente.');
+        }
+
+        const userInfo = JSON.parse(userInfoString);
+        const profissionalId = userInfo.id; // <<-- ASSUMINDO QUE O ID ESTÁ AQUI
+
+        // Se o ID não estiver no userInfo, você precisará ajustar o backend para buscá-lo pelo email
         if (!profissionalId) {
-            throw new Error('ID do profissional não encontrado');
+            // Alternativa: enviar o email e o backend busca o ID.
+            // Por enquanto, vamos lançar um erro claro.
+            throw new Error('ID do profissional não encontrado dentro de userInfo no localStorage.');
         }
 
         const formData = new FormData();
@@ -180,27 +196,27 @@ document.addEventListener('DOMContentLoaded', function () {
         // Adiciona metadados
         formData.append('eventType', eventTypeSelect.value);
         formData.append('eventDate', eventDateInput.value);
-        formData.append('profissionalId', profissionalId);
+        formData.append('profissionalId', profissionalId); // Agora com o ID correto
 
         // Adiciona todos os arquivos
-        selectedFiles.forEach((file, index) => {
+        selectedFiles.forEach(file => {
             formData.append(`files`, file);
         });
 
         const response = await fetch(`${API_BASE_URL}/galeria/upload-multiple`, {
             method: 'POST',
             headers: {
+                // O 'Content-Type' para multipart/form-data é definido automaticamente pelo navegador
                 'Authorization': `Bearer ${token}`
             },
             body: formData
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Erro no upload');
+            const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido no servidor.' }));
+            throw new Error(errorData.message || 'Falha no upload dos arquivos.');
         }
     }
-
     // Função para carregar uploads recentes
     async function loadRecentUploads() {
         try {
