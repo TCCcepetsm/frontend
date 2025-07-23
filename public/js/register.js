@@ -61,7 +61,7 @@ function createFeedbackElements() {
         spinner.innerHTML = '⏳'; // Pode ser substituído por um GIF
 
         // Adiciona o spinner após o botão de submit
-        const submitBtn = document.querySelector('#registerForm .register-button');
+        const submitBtn = document.getElementById('registerBtn');
         if (submitBtn) {
             submitBtn.insertAdjacentElement('afterend', spinner);
         }
@@ -83,13 +83,15 @@ function createFeedbackElements() {
 
 // Função principal que lida com o registro
 async function handleRegister() {
-    // Encontra o botão de submit
-    const submitBtn = document.querySelector('#registerForm .register-button');
+    // Encontra o botão de submit pelo ID
+    const submitBtn = document.getElementById('registerBtn');
 
     try {
         // Desabilita o botão e mostra o spinner
-        if (submitBtn) submitBtn.disabled = true;
-        toggleLoading(true);
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            toggleLoading(true);
+        }
 
         // Obtém e valida os dados do formulário
         const formData = getFormData();
@@ -118,8 +120,10 @@ async function handleRegister() {
         showError(error.message || 'Erro ao realizar o registro');
     } finally {
         // Reabilita o botão e esconde o spinner
-        if (submitBtn) submitBtn.disabled = false;
-        toggleLoading(false);
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            toggleLoading(false);
+        }
     }
 }
 
