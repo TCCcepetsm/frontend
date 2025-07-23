@@ -1,33 +1,82 @@
-// Simulação de dados vindos do banco de dados
-document.addEventListener('DOMContentLoaded', function () {
-    // Em uma aplicação real, você faria uma requisição AJAX para obter esses dados
-    // Aqui estamos simulando os dados
-    const agendamento = {
-        nome: "João Silva",
-        email: "joao.silva@exemplo.com",
-        telefone: "(11) 98765-4321",
-        plano: "Intermediário",
-        data: "2023-12-15",
-        horario: "14:30",
-        endereco: "Av. Paulista, 1000 - Bela Vista, São Paulo - SP",
-        status: "Confirmado"
-    };
+document.addEventListener("DOMContentLoaded", async () => {
+    // Verificar autenticação
+    if (typeof window.checkAuthentication !== 'function' || !window.checkAuthentication()) {
+        window.location.href = 'login.html';
+        return;
+    }
 
-    // Preenchendo os dados na página
-    document.getElementById('info-nome').textContent = agendamento.nome;
-    document.getElementById('info-email').textContent = agendamento.email;
-    document.getElementById('info-telefone').textContent = agendamento.telefone;
-    document.getElementById('info-plano').textContent = agendamento.plano;
-    document.getElementById('info-data').textContent = formatarData(agendamento.data);
-    document.getElementById('info-horario').textContent = agendamento.horario;
-    document.getElementById('info-endereco').textContent = agendamento.endereco;
-    document.getElementById('info-status').textContent = agendamento.status;
+    const token = window.getAuthToken();
+    if (!token) {
+        alert("Erro de autenticação. Faça login novamente.");
+        window.location.href = 'login.html';
+        return;
+    }
 
-    // Adiciona classe de acordo com o status
-    document.getElementById('info-status').className = 'info-value status-' + agendamento.status.toLowerCase();
+    // Obter ID do agendamento da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const agendamentoId = urlParams.get('id');
+
+    if (!agendamentoId) {
+        alert("ID do agendamento não encontrado.");
+        window.location.href = 'agendamentosConfirmadosLista.html';
+        return;
+    }
+
+    // Elementos da página
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const content = document.getElementById('content');
+
+    // Função para carregar detalhes
+    async function loadAgendamentoDetails() {
+        try {
+            const response = await fetch(`https://psychological-cecilla-peres-7395ec38.koyeb.app/api/agendamentos2/${agendamentoId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            // Preencher os dados
+            document.getElementById('info-nome').textContent = data.nome || data.nomeCliente || 'N/A';
+            document.getElementById('info-email').textContent = data.email || 'N/A';
+            document.getElementById('info-telefone').textContent = data.telefone || 'N/A';
+            document.getElementById('info-plano').textContent = data.plano || 'N/A';
+            document.getElementById('info-data').textContent = formatarData(data.data) || 'N/A';
+            document.getElementById('info-horario').textContent = data.horario || 'N/A';
+            document.getElementById('info-endereco').textContent = data.endereco || data.local || 'N/A';
+
+            const statusElement = document.getElementById('info-status');
+            statusElement.textContent = data.status || 'CONFIRMADO';
+            statusElement.className = 'info-value status-confirmado';
+
+            // Mostrar conteúdo
+            loadingSpinner.style.display = 'none';
+            content.style.display = 'block';
+
+        } catch (error) {
+            console.error("Erro ao carregar detalhes:", error);
+            loadingSpinner.innerHTML = `<p>Erro ao carregar detalhes: ${error.message}</p>`;
+        }
+    }
+
+    // Função para formatar data
+    function formatarData(dataString) {
+        try {
+            const [year, month, day] = dataString.split('-');
+            return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
+        } catch (e) {
+            console.error("Erro ao formatar data:", e);
+            return dataString;
+        }
+    }
+
+    // Carregar os dados
+    loadAgendamentoDetails();
 });
-
-function formatarData(data) {
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-    return new Date(data).toLocaleDateString('pt-BR', options);
-}   

@@ -58,28 +58,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Função para identificar CNPJ/Profissional
 function checkIfCnpjProfessional(user) {
-    // Verifica pelo campo CNPJ (não vazio)
-    if (user.cnpj && user.cnpj.trim() !== '') {
+    // Verifica se tem ROLE_PROFISSIONAL (seu "admin")
+    if (Array.isArray(user.roles) && user.roles.includes('ROLE_PROFISSIONAL')) {
         return true;
     }
 
-    // Verifica pelo tipo de conta
-    if (user.tipo && ['CNPJ', 'PROFISSIONAL'].includes(user.tipo.toUpperCase())) {
-        return true;
-    }
-
-    // Verifica pelas roles do usuário
-    if (Array.isArray(user.roles)) {
-        return user.roles.includes('ROLE_PROFISSIONAL') ||
-            user.roles.includes('ROLE_ADMIN');
-    }
-
-    // Verifica por outros indicadores
-    if (user.isProfessional || user.isAdmin) {
-        return true;
-    }
-
-    return false;
+    // Verifica outros critérios (CNPJ ou tipo PJ)
+    return (
+        (user.cnpj && user.cnpj.trim() !== '') ||
+        (user.tipo && ['PJ', 'CNPJ', 'PROFISSIONAL'].includes(user.tipo.toUpperCase()))
+    );
 }

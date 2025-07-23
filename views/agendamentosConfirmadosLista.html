@@ -4,13 +4,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendamentos Confirmados - Gravação</title>
-    <link rel="stylesheet" href="../css/agendamentoConfirmados.css"> <link rel="stylesheet" href="../css/style.css"> </head>
+    <title>Agendamentos Confirmados</title>
+    <link rel="stylesheet" href="../public/css/agendamentoConfirmados.css">
+    <style>
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn-acessar {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-acessar:hover {
+            background-color: #2980b9;
+        }
+
+        .status-confirmado {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+    </style>
+</head>
 
 <body>
     <div class="top-bar">
         <a href="inicialAdmin.html">
-            <img src="../images/logoAdmin.png" alt="Logo da Empresa" class="logo">
+            <img src="../public/images/logoAdmin.png" alt="Logo da Empresa" class="logo">
         </a>
     </div>
 
@@ -25,22 +65,26 @@
                         <th>Solicitante</th>
                         <th>Plano</th>
                         <th>Status</th>
-                        <th>Ações</th> </tr>
+                        <th>Ações</th>
+                    </tr>
                 </thead>
-                <tbody id="agendamentos-confirmados-table-body">
+                <tbody id="agendamentos-table-body">
                     <tr>
-                        <td colspan="6">Carregando agendamentos...</td>
+                        <td colspan="6">
+                            <div class="spinner"></div>
+                            <div style="text-align: center;">Carregando agendamentos...</div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <div class="button-group" style="margin-top: 20px;">
-            <button onclick="window.location.href='inicialAdmin.html'" class="btn-voltar">Voltar para Início</button>
+        <div class="button-group">
+            <a href="inicialAdmin.html" class="btn btn-secondary">Voltar para Início</a>
         </div>
     </div>
 
-    <script src="../js/auth.js"></script>
-    <script src="../public/js/agendamentosConfirmadosLista.js"></script> 
+    <script src="../public/js/auth.js"></script>
+    <script src="../public/js/agendamentosConfirmadosLista.js"></script>
 </body>
 
 </html>

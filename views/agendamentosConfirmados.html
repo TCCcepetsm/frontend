@@ -3,63 +3,101 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Detalhes do Agendamento</title>
-    <link rel="stylesheet" href="/../public/css/agnConf.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Agendamento Confirmado</title>
+    <link rel="stylesheet" href="../public/css/agnConf.css">
+    <style>
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-confirmado {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .info-item {
+            margin-bottom: 15px;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 
 <body>
     <div class="top-bar">
         <a href="inicialAdmin.html">
-            <img src="/../public/images/logoAdmin.png" alt="Logo da Empresa" class="logo">
+            <img src="../public/images/logoAdmin.png" alt="Logo da Empresa" class="logo">
         </a>
     </div>
 
     <div class="card">
-        <h3>Detalhes do agendamento</h3>
+        <h3>Detalhes do Agendamento Confirmado</h3>
         <div id="detalhes-agendamento">
-            <div class="info-item">
-                <label>Solicitante</label>
-                <div class="info-value" id="info-nome">Carregando...</div>
-            </div>
+            <div id="loading-spinner" class="spinner"></div>
 
-            <div class="info-item">
-                <label>E-mail do solicitante</label>
-                <div class="info-value" id="info-email">Carregando...</div>
-            </div>
-
-            <div class="info-item">
-                <label>Telefone</label>
-                <div class="info-value" id="info-telefone">Carregando...</div>
-            </div>
-
-            <div class="info-item">
-                <label>Plano</label>
-                <div class="info-value" id="info-plano">Carregando...</div>
-            </div>
-
-            <div class="info-item">
-                <label>Data solicitada</label>
-                <div class="info-value" id="info-data">Carregando...</div>
-            </div>
-
-            <div class="info-item">
-                <label>Horário solicitado</label>
-                <div class="info-value" id="info-horario">Carregando...</div>
-            </div>
-
-            <div class="info-item">
-                <label>Endereço</label>
-                <div class="info-value" id="info-endereco">Carregando...</div>
-            </div>
-
-            <div class="info-item">
-                <label>Status</label>
-                <div class="info-value" id="info-status">Carregando...</div>
+            <div id="content" style="display: none;">
+                <div class="info-item">
+                    <label>Solicitante</label>
+                    <div class="info-value" id="info-nome"></div>
+                </div>
+                <div class="info-item">
+                    <label>E-mail</label>
+                    <div class="info-value" id="info-email"></div>
+                </div>
+                <div class="info-item">
+                    <label>Telefone</label>
+                    <div class="info-value" id="info-telefone"></div>
+                </div>
+                <div class="info-item">
+                    <label>Plano</label>
+                    <div class="info-value" id="info-plano"></div>
+                </div>
+                <div class="info-item">
+                    <label>Data</label>
+                    <div class="info-value" id="info-data"></div>
+                </div>
+                <div class="info-item">
+                    <label>Horário</label>
+                    <div class="info-value" id="info-horario"></div>
+                </div>
+                <div class="info-item">
+                    <label>Endereço</label>
+                    <div class="info-value" id="info-endereco"></div>
+                </div>
+                <div class="info-item">
+                    <label>Status</label>
+                    <div class="info-value" id="info-status"></div>
+                </div>
+                <div class="button-group">
+                    <a href="agendamentosConfirmadosLista.html" class="btn btn-secondary">Voltar para Lista</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="/../public/js/agendamentosConfirmados.js"></script>
+    <script src="../public/js/auth.js"></script>
+    <script src="../public/js/agendamentosConfirmados.js"></script>
 </body>
 
 </html>

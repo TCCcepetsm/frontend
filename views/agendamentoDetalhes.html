@@ -3,8 +3,86 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes do Agendamento</title>
-    <link rel="stylesheet" href="../public/css/agendamentoDetalhes.css">
+    <link rel="stylesheet" href="../public/css/agnConf.css">
+    <style>
+        /* Estilos para o spinner */
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Classes de status */
+        .status-pendente {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .status-confirmado {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .status-recusado {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        /* Botões */
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: inline-block;
+        }
+
+        .actions {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,55 +95,62 @@
     <div class="card">
         <h3>Detalhes do agendamento</h3>
         <div id="detalhes-agendamento">
-            <div class="info-item">
-                <label>Solicitante</label>
-                <div class="info-value" id="info-nome">Carregando...</div>
+            <div class="spinner-container" id="loading-spinner">
+                <div class="spinner"></div>
             </div>
 
-            <div class="info-item">
-                <label>E-mail do solicitante</label>
-                <div class="info-value" id="info-email">Carregando...</div>
-            </div>
+            <div id="content" style="display: none;">
+                <div class="info-item">
+                    <label>Solicitante</label>
+                    <div class="info-value" id="info-nome"></div>
+                </div>
 
-            <div class="info-item">
-                <label>Telefone</label>
-                <div class="info-value" id="info-telefone">Carregando...</div>
-            </div>
+                <div class="info-item">
+                    <label>E-mail do solicitante</label>
+                    <div class="info-value" id="info-email"></div>
+                </div>
 
-            <div class="info-item">
-                <label>Plano</label>
-                <div class="info-value" id="info-plano">Carregando...</div>
-            </div>
+                <div class="info-item">
+                    <label>Telefone</label>
+                    <div class="info-value" id="info-telefone"></div>
+                </div>
 
-            <div class="info-item">
-                <label>Endereço</label>
-                <div class="info-value" id="info-endereco">Carregando...</div>
-            </div>
+                <div class="info-item">
+                    <label>Plano</label>
+                    <div class="info-value" id="info-plano"></div>
+                </div>
 
-            <div class="info-item">
-                <label>Data solicitada</label>
-                <div class="info-value" id="info-data">Carregando...</div>
-            </div>
+                <div class="info-item">
+                    <label>Data solicitada</label>
+                    <div class="info-value" id="info-data"></div>
+                </div>
 
-            <div class="info-item">
-                <label>Horário solicitado</label>
-                <div class="info-value" id="info-horario">Carregando...</div>
-            </div>
+                <div class="info-item">
+                    <label>Horário solicitado</label>
+                    <div class="info-value" id="info-horario"></div>
+                </div>
 
-            <div class="info-item">
-                <label>Status</label>
-                <div class="info-value" id="info-status">Carregando...</div>
-            </div>
+                <div class="info-item">
+                    <label>Endereço</label>
+                    <div class="info-value" id="info-endereco"></div>
+                </div>
 
-            <div class="button-group">
-                <button id="btn-confirmar" class="btn btn-primary">Confirmar</button>
-                <button id="btn-recusar" class="btn btn-danger">Recusar</button>
-                <a href="agendamentoAdmin.html" class="btn btn-secondary">Voltar para Lista</a>
+                <div class="info-item">
+                    <label>Status</label>
+                    <div class="info-value" id="info-status"></div>
+                </div>
+
+                <div class="actions" id="action-buttons">
+                    <button id="btn-confirmar" class="btn btn-primary">Confirmar</button>
+                    <button id="btn-recusar" class="btn btn-danger">Recusar</button>
+                    <a href="agendamentoAdmin.html" class="btn btn-secondary">Voltar</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="../public/js/auth.js"></script> <script src="../public/js/agendamentoDetalhes.js"></script>
+    <script src="../public/js/auth.js"></script>
+    <script src="../public/js/agendamentoDetalhes.js"></script>
 </body>
 
 </html>
