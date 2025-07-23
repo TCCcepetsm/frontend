@@ -86,11 +86,9 @@ async function handleRegister() {
     const submitBtn = document.getElementById('registerBtn');
 
     try {
-        // Desabilita o botão e mostra loading
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            toggleLoading(true);
-        }
+        // Desabilita o botão durante o processamento
+        if (submitBtn) submitBtn.disabled = true;
+        toggleLoading(true);
 
         const formData = getFormData();
         const errors = validateForm(formData);
@@ -100,34 +98,62 @@ async function handleRegister() {
             return;
         }
 
-        const response = await makeApiRequest(formData);
+        // Debug: Mostra os dados sendo enviados
+        console.log('Dados enviados:', formData);
+
+        const response = await fetch('https://psychological-cecilla-peres-7395ec38.koyeb.app/api/usuario/registrar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                nome: formData.nome,
+                email: formData.email,
+                telefone: formData.telefone,
+                senha: formData.senha,
+                confirmarSenha: formData.confirmarSenha,
+                agreeTerms: formData.agreeTerms,
+                tipo: formData.tipo,
+                cpf: formData.tipo === 'PF' ? formData.cpf : undefined,
+                cnpj: formData.tipo === 'PJ' ? formData.cnpj : undefined
+            })
+        });
+
+        // Debug: Mostra a resposta bruta
+        const responseText = await response.text();
+        console.log('Resposta da API:', {
+            status: response.status,
+            headers: [...response.headers.entries()],
+            body: responseText || '(vazio)'
+        });
 
         // Verifica se a resposta está vazia
-        if (!response.ok || response.status === 204) {
-            throw new Error('Resposta vazia do servidor');
+        if (!responseText.trim()) {
+            throw new Error('O servidor retornou uma resposta vazia');
         }
 
         // Tenta parsear o JSON
-        let data;
+        let responseData;
         try {
-            data = await response.json();
-        } catch (parseError) {
-            console.error('Erro ao parsear resposta:', parseError);
-            throw new Error('Formato de resposta inválido');
+            responseData = JSON.parse(responseText);
+        } catch (e) {
+            throw new Error(`Resposta inválida do servidor: ${e.message}`);
+        }
+
+        if (!response.ok) {
+            throw new Error(responseData.message || `Erro ${response.status}`);
         }
 
         showSuccess('Registro realizado com sucesso!');
         setTimeout(() => window.location.href = '/views/login.html', 2000);
 
     } catch (error) {
-        console.error('Erro no registro:', error);
-        showError(error.message || 'Erro ao realizar o registro');
+        console.error('Erro completo:', error);
+        showError(error.message || 'Erro ao conectar com o servidor');
     } finally {
         // Reabilita o botão
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            toggleLoading(false);
-        }
+        if (submitBtn) submitBtn.disabled = false;
+        toggleLoading(false);
     }
 }
 // Controla a exibição do spinner
