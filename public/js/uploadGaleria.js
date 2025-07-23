@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Verificar autenticação primeiro
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
     // Elementos do DOM
     const dropZone = document.querySelector('.drop-zone');
     const fileInput = document.getElementById('mediaFiles');
@@ -6,6 +13,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const uploadForm = document.getElementById('uploadForm');
     const submitBtn = document.getElementById('submitBtn');
     const uploadsList = document.getElementById('uploadsList');
+    const eventTypeSelect = document.getElementById('eventType');
+    const eventDateInput = document.getElementById('eventDate');
+
+    // Configurar data padrão como hoje
+    eventDateInput.valueAsDate = new Date();
 
     // Array para armazenar os arquivos selecionados
     let selectedFiles = [];
@@ -21,26 +33,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        dropZone.style.backgroundColor = 'rgba(231, 125, 0, 0.2)';
+        dropZone.classList.add('drop-zone--active');
     });
 
     dropZone.addEventListener('dragleave', () => {
-        dropZone.style.backgroundColor = 'rgba(231, 125, 0, 0.05)';
+        dropZone.classList.remove('drop-zone--active');
     });
 
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
-        dropZone.style.backgroundColor = 'rgba(231, 125, 0, 0.05)';
+        dropZone.classList.remove('drop-zone--active');
 
         if (e.dataTransfer.files.length) {
-            fileInput.files = e.dataTransfer.files;
-            handleFiles(e.dataTransfer.files);
+            handleFilesSelection(e.dataTransfer.files);
         }
     });
 
     fileInput.addEventListener('change', () => {
         if (fileInput.files.length) {
-            handleFiles(fileInput.files);
+            handleFilesSelection(fileInput.files);
         }
     });
 
@@ -48,55 +59,96 @@ document.addEventListener('DOMContentLoaded', function () {
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        if (selectedFiles.length === 0) {
-            alert('Por favor, selecione pelo menos um arquivo.');
+        if (!validateForm()) {
             return;
         }
 
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Enviando...';
-
         try {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
+
             await uploadFiles();
-            alert('Arquivos enviados com sucesso!');
-            selectedFiles = [];
-            filePreview.innerHTML = '';
-            fileInput.value = '';
+
+            showAlert('success', 'Arquivos enviados com sucesso!');
+            resetForm();
             loadRecentUploads();
         } catch (error) {
             console.error('Erro no upload:', error);
-            alert('Ocorreu um erro ao enviar os arquivos. Por favor, tente novamente.');
+            showAlert('error', error.message || 'Erro ao enviar arquivos');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Enviar Arquivos';
         }
     });
 
-    // Função para lidar com os arquivos selecionados
-    function handleFiles(files) {
-        selectedFiles = Array.from(files);
+    // Função para validar o formulário
+    function validateForm() {
+        if (selectedFiles.length === 0) {
+            showAlert('error', 'Por favor, selecione pelo menos um arquivo.');
+            return false;
+        }
+
+        if (!eventTypeSelect.value) {
+            showAlert('error', 'Por favor, selecione o tipo de evento.');
+            return false;
+        }
+
+        if (!eventDateInput.value) {
+            showAlert('error', 'Por favor, informe a data do evento.');
+            return false;
+        }
+
+        return true;
+    }
+
+    // Função para lidar com a seleção de arquivos
+    function handleFilesSelection(files) {
+        // Filtra apenas arquivos de imagem e vídeo
+        selectedFiles = Array.from(files).filter(file =>
+            file.type.startsWith('image/') || file.type.startsWith('video/')
+        );
+
+        if (selectedFiles.length !== files.length) {
+            showAlert('warning', 'Alguns arquivos não são imagens ou vídeos e foram ignorados.');
+        }
+
+        if (selectedFiles.length === 0) {
+            filePreview.innerHTML = '<p class="no-files">Nenhum arquivo válido selecionado</p>';
+            return;
+        }
+
+        renderFilePreviews();
+    }
+
+    // Função para renderizar pré-visualizações
+    function renderFilePreviews() {
         filePreview.innerHTML = '';
 
         selectedFiles.forEach((file, index) => {
             const previewItem = document.createElement('div');
             previewItem.className = 'preview-item';
+            previewItem.dataset.index = index;
+
+            const previewContent = document.createElement('div');
+            previewContent.className = 'preview-content';
 
             if (file.type.startsWith('image/')) {
                 const img = document.createElement('img');
                 img.src = URL.createObjectURL(file);
-                previewItem.appendChild(img);
-            } else if (file.type.startsWith('video/')) {
+                previewContent.appendChild(img);
+            } else {
                 const video = document.createElement('video');
                 video.src = URL.createObjectURL(file);
                 video.controls = true;
-                previewItem.appendChild(video);
-            } else {
-                previewItem.textContent = file.name;
-                previewItem.style.display = 'flex';
-                previewItem.style.alignItems = 'center';
-                previewItem.style.justifyContent = 'center';
-                previewItem.style.backgroundColor = '#f0f0f0';
+                previewContent.appendChild(video);
             }
+
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'file-info';
+            fileInfo.innerHTML = `
+                <span class="file-name">${file.name}</span>
+                <span class="file-size">${formatFileSize(file.size)}</span>
+            `;
 
             const removeBtn = document.createElement('button');
             removeBtn.className = 'remove-btn';
@@ -104,9 +156,11 @@ document.addEventListener('DOMContentLoaded', function () {
             removeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 selectedFiles.splice(index, 1);
-                handleFiles(selectedFiles);
+                renderFilePreviews();
             });
 
+            previewItem.appendChild(previewContent);
+            previewItem.appendChild(fileInfo);
             previewItem.appendChild(removeBtn);
             filePreview.appendChild(previewItem);
         });
@@ -114,40 +168,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Função para fazer upload dos arquivos
     async function uploadFiles() {
-        const token = localStorage.getItem('token');
+        const profissionalId = localStorage.getItem('userId');
+        if (!profissionalId) {
+            throw new Error('ID do profissional não encontrado');
+        }
 
-        for (const file of selectedFiles) {
-            const formData = new FormData();
-            formData.append('file', file);
+        const formData = new FormData();
 
-            // Determinar tipo baseado no arquivo
-            const tipo = file.type.startsWith('image/') ? 'FOTO' : 'VIDEO';
-            formData.append('tipo', tipo);
+        // Adiciona metadados
+        formData.append('eventType', eventTypeSelect.value);
+        formData.append('eventDate', eventDateInput.value);
+        formData.append('profissionalId', profissionalId);
 
-            // Adicionar ID do profissional se disponível
-            const profissionalId = localStorage.getItem('userId');
-            if (profissionalId) {
-                formData.append('profissionalId', profissionalId);
-            }
+        // Adiciona todos os arquivos
+        selectedFiles.forEach((file, index) => {
+            formData.append(`files`, file);
+        });
 
-            const response = await fetch(`${API_BASE_URL}/galeria/upload`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
+        const response = await fetch(`${API_BASE_URL}/galeria/upload-multiple`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
 
-            if (!response.ok) {
-                throw new Error(`Erro no upload: ${response.status}`);
-            }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Erro no upload');
         }
     }
 
     // Função para carregar uploads recentes
     async function loadRecentUploads() {
         try {
-            const token = localStorage.getItem('token');
+            showLoading(uploadsList, 'Carregando uploads recentes...');
+
             const response = await fetch(`${API_BASE_URL}/galeria`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -155,8 +211,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
+            if (response.status === 401) {
+                window.location.href = 'login.html';
+                return;
+            }
+
             if (!response.ok) {
-                throw new Error(`Erro ao carregar galeria: ${response.status}`);
+                throw new Error(`Erro ${response.status}`);
             }
 
             const uploads = await response.json();
@@ -164,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         } catch (error) {
             console.error('Erro ao carregar uploads:', error);
-            uploadsList.innerHTML = '<p>Erro ao carregar uploads recentes.</p>';
+            showError(uploadsList, 'Erro ao carregar uploads recentes');
         }
     }
 
@@ -172,54 +233,74 @@ document.addEventListener('DOMContentLoaded', function () {
     function displayUploads(uploads) {
         uploadsList.innerHTML = '';
 
-        if (uploads.length === 0) {
-            uploadsList.innerHTML = '<p>Nenhum upload encontrado.</p>';
+        if (!uploads || uploads.length === 0) {
+            uploadsList.innerHTML = '<p class="no-uploads">Nenhum upload encontrado</p>';
             return;
         }
 
         uploads.forEach(upload => {
             const item = document.createElement('div');
             item.className = 'upload-item';
+            item.dataset.id = upload.id;
+
+            const mediaContainer = document.createElement('div');
+            mediaContainer.className = 'media-container';
 
             if (upload.tipo === 'FOTO') {
                 const img = document.createElement('img');
                 img.src = upload.midiaUrl;
                 img.alt = 'Foto da galeria';
+                img.loading = 'lazy';
                 img.onerror = function () {
                     this.src = '/images/image-placeholder.png';
                 };
-                item.appendChild(img);
+                mediaContainer.appendChild(img);
             } else {
                 const video = document.createElement('video');
                 video.src = upload.midiaUrl;
                 video.controls = true;
+                video.preload = 'metadata';
                 video.onerror = function () {
-                    this.innerHTML = '<p>Erro ao carregar vídeo</p>';
+                    this.innerHTML = '<p>Vídeo não disponível</p>';
                 };
-                item.appendChild(video);
+                mediaContainer.appendChild(video);
             }
 
             const info = document.createElement('div');
-            info.className = 'upload-item-info';
+            info.className = 'upload-info';
             info.innerHTML = `
-                <h4>${upload.tipo}</h4>
-                <p>${formatDate(upload.dataPostagem)}</p>
-                <button class="delete-btn" onclick="deleteUpload(${upload.id})">Excluir</button>
+                <div class="upload-meta">
+                    <span class="upload-type">${upload.tipo}</span>
+                    <span class="upload-date">${formatDate(upload.dataPostagem)}</span>
+                </div>
+                <div class="upload-event">
+                    <span class="event-type">${upload.eventType || 'Sem tipo'}</span>
+                    <span class="event-date">${formatDate(upload.eventDate)}</span>
+                </div>
             `;
 
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.addEventListener('click', () => deleteUpload(upload.id));
+
+            item.appendChild(mediaContainer);
             item.appendChild(info);
+            item.appendChild(deleteBtn);
             uploadsList.appendChild(item);
         });
     }
 
     // Função para deletar upload
-    window.deleteUpload = async function (id) {
-        if (!confirm('Tem certeza que deseja excluir este item?')) {
+    async function deleteUpload(id) {
+        if (!confirm('Tem certeza que deseja excluir este item permanentemente?')) {
             return;
         }
 
         try {
-            const token = localStorage.getItem('token');
+            const item = document.querySelector(`.upload-item[data-id="${id}"]`);
+            if (item) item.classList.add('deleting');
+
             const response = await fetch(`${API_BASE_URL}/galeria/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -227,28 +308,84 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            if (response.ok) {
-                alert('Item excluído com sucesso!');
-                loadRecentUploads();
-            } else {
-                throw new Error(`Erro ao excluir: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`Erro ${response.status}`);
             }
+
+            // Anima a remoção do item
+            if (item) {
+                item.classList.add('deleted');
+                setTimeout(() => {
+                    loadRecentUploads();
+                }, 500);
+            } else {
+                loadRecentUploads();
+            }
+
+            showAlert('success', 'Item excluído com sucesso!');
         } catch (error) {
             console.error('Erro ao excluir:', error);
-            alert('Erro ao excluir o item.');
+            showAlert('error', 'Erro ao excluir o item');
         }
-    };
+    }
 
-    // Função auxiliar para formatar data
+    // Funções auxiliares
     function formatDate(dateString) {
-        const options = {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
             year: 'numeric',
-            month: 'short',
-            day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
-        };
-        return new Date(dateString).toLocaleDateString('pt-BR', options);
+        });
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i]);
+    }
+
+    function showAlert(type, message) {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type}`;
+        alert.textContent = message;
+
+        document.body.appendChild(alert);
+
+        setTimeout(() => {
+            alert.classList.add('fade-out');
+            setTimeout(() => alert.remove(), 500);
+        }, 3000);
+    }
+
+    function showLoading(container, message) {
+        container.innerHTML = `
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>${message}</p>
+            </div>
+        `;
+    }
+
+    function showError(container, message) {
+        container.innerHTML = `
+            <div class="error-state">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>${message}</p>
+                <button onclick="location.reload()">Tentar novamente</button>
+            </div>
+        `;
+    }
+
+    function resetForm() {
+        selectedFiles = [];
+        filePreview.innerHTML = '';
+        fileInput.value = '';
+        eventTypeSelect.value = '';
+        eventDateInput.valueAsDate = new Date();
     }
 });
-

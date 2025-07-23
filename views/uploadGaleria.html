@@ -6,16 +6,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload de Galeria | Empresa</title>
     <link rel="stylesheet" href="../public/css/uploadGaleria.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Estilos globais */
+        :root {
+            --primary-color: #e77d00;
+            --secondary-color: #2c3e50;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --warning-color: #ffc107;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+        }
+
+        /* Alertas */
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .alert-success {
+            background-color: var(--success-color);
+        }
+
+        .alert-error {
+            background-color: var(--error-color);
+        }
+
+        .alert-warning {
+            background-color: var(--warning-color);
+            color: var(--dark-gray);
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Drop zone melhorada */
+        .drop-zone {
+            border: 2px dashed var(--primary-color);
+            transition: all 0.3s;
+        }
+
+        .drop-zone--active {
+            background-color: rgba(231, 125, 0, 0.1);
+            border-color: var(--secondary-color);
+        }
+
+        /* Pré-visualização de arquivos */
+        .file-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .preview-item:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Efeitos para uploads */
+        .upload-item.deleting {
+            opacity: 0.5;
+        }
+
+        .upload-item.deleted {
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+    </style>
 </head>
 
 <body>
-    <header>
-        <div class="logo">
-            <a href="inicialAdmin.html">
-                <img src="../public/images/logoAdmin.png" alt="Logo da Empresa">
-            </a>
-        </div>
-    </header>
+    <!-- Cabeçalho mantido similar -->
 
     <div class="container">
         <h1 class="page-title">Upload de Galeria</h1>
@@ -28,44 +126,61 @@
                 </div>
 
                 <form id="uploadForm" class="upload-form">
-                    <div class="form-group">
-                        <label for="eventType">Tipo de Evento:</label>
-                        <select id="eventType" name="eventType" required>
-                            <option value="">Selecione...</option>
-                            <option value="futebol">Futebol</option>
-                            <option value="tenis">Tênis</option>
-                            <option value="maratona">Maratona</option>
-                            <option value="outros">Outros</option>
-                        </select>
-                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eventType">Tipo de Evento:</label>
+                            <select id="eventType" name="eventType" required>
+                                <option value="">Selecione...</option>
+                                <option value="futebol">Futebol</option>
+                                <option value="tenis">Tênis</option>
+                                <option value="maratona">Maratona</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="eventDate">Data do Evento:</label>
-                        <input type="date" id="eventDate" name="eventDate" required>
+                        <div class="form-group">
+                            <label for="eventDate">Data do Evento:</label>
+                            <input type="date" id="eventDate" name="eventDate" required>
+                        </div>
                     </div>
 
                     <div class="form-group file-upload">
                         <label for="mediaFiles">Selecione os arquivos:</label>
                         <input type="file" id="mediaFiles" name="mediaFiles" multiple accept="image/*,video/*" required>
                         <div class="drop-zone">
-                            <span class="drop-zone__prompt">Arraste arquivos aqui ou clique para selecionar</span>
-                            <span class="drop-zone__info">Formatos aceitos: JPG, PNG, MP4, MOV</span>
+                            <div class="drop-zone-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span class="drop-zone__prompt">Arraste arquivos aqui ou clique para selecionar</span>
+                                <span class="drop-zone__info">Formatos aceitos: JPG, PNG, MP4, MOV (Máx. 50MB
+                                    cada)</span>
+                            </div>
                         </div>
                         <div id="filePreview" class="file-preview"></div>
                     </div>
 
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary"
-                            onclick="window.history.back()">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">Enviar Arquivos</button>
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-upload"></i> Enviar Arquivos
+                        </button>
                     </div>
                 </form>
             </div>
 
             <div class="recent-uploads">
-                <h3>Uploads Recentes</h3>
+                <div class="uploads-header">
+                    <h3><i class="fas fa-history"></i> Uploads Recentes</h3>
+                    <button class="btn-refresh" onclick="loadRecentUploads()">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
                 <div id="uploadsList" class="uploads-list">
-                    <!-- Itens serão carregados via JavaScript -->
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Carregando uploads...</p>
+                    </div>
                 </div>
             </div>
         </div>
